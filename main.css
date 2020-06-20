@@ -1,0 +1,110 @@
+/* text Styles */
+
+body {
+    font-family: monospace;
+    font-size: 18px;
+}
+
+h1 {
+    font-size: 1.33em;
+    text-transform: uppercase;
+}
+
+/* Item Positioning */
+
+p,
+select,
+table {
+    margin: 20px 0;
+}
+
+.padded-container {
+    padding: 20px;
+}
+
+/* Layout */
+
+.wrapper {
+    max-width: 520px;
+    margin: auto;
+}
+
+.bg-dark {
+    background-color: #c4c4c4;
+}
+
+.bg-med {
+    background-color: #dddddd;
+}
+
+.bg-light {
+    background-color: #e5e5e5;
+}
+
+.container {
+    display: flex;
+}
+
+.container.ctr-stacked {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.container.ctr-center-content {
+    justify-content: center;
+    align-items: center;
+}
+
+.container.ctr-justified {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.container.date-picker {
+    min-width: 280px;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+header .container {
+    min-height: 100px;
+}
+
+table {
+    width: 100%;
+    max-width: 300px;
+}
+
+/* Form Elements */
+
+label,
+fieldset,
+input {
+    display: inline-block;
+}
+
+label {
+    font-weight: bold;
+    font-size: 1.33em;
+}
+
+select {
+    min-height: 30px;
+    min-width: 200px;
+}
+
+input {
+    min-width: 100px;
+    min-height: 20px;
+    font-size: 0.5em;
+}
+
+button {
+    background-color: #000;
+    font-family: monospace;
+    color: #fff;
+    border-color: #000;
+    border-radius: 35px;
+    padding: 10px;
+}
