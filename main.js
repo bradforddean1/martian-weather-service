@@ -1,49 +1,66 @@
+// object approach
+// objects and events
+// date picker
+// legend
+
 // STORE
 const STORE = {
     martianWeather: {
-        at: [
-            // { dd: "252", avg: 55, high: 33, low: 12 },
-            // { dd: "253", avg: 155, high: 133, low: 112 },
-            // { dd: "254", avg: 155, high: 133, low: 112, windDir: "SSW" },
-        ],
-
-        pressure: [
-            // { dd: "252", avg: 10, high: 22, low: 32 },
-            // { dd: "253", avg: 255, high: 333, low: 112 },
-            // { dd: "254", avg: 155, high: 133, low: 112, windDir: "SSW" },
-        ],
-        wind: [
-            // { dd: "252", avg: 15, high: 31, low: 12 },
-            // { dd: "253", avg: 155, high: 133, low: 412 },
-            // { dd: "254", avg: 155, high: 133, low: 112, windDir: "SNW" },
-        ],
+        at: [],
+        pressure: [],
+        wind: [],
     },
     earthWeather: {
-        at: [
-            { dd: "252", avg: 55, high: 33, low: 12 },
-            { dd: "253", avg: 355, high: 333, low: 312 },
-            { dd: "254", avg: 155, high: 133, low: 112 },
-        ],
-        pressure: [
-            { dd: "252", avg: 20, high: 22, low: 22 },
-            { dd: "253", avg: 255, high: 333, low: 112 },
-            { dd: "254", avg: 155, high: 133, low: 112 },
-        ],
-        wind: [
-            { dd: "252", avg: 15, high: 31, low: 12, windDir: "NSW" },
-            { dd: "253", avg: 155, high: 133, low: 412, windDir: "SNW" },
-            { dd: "254", avg: 155, high: 113, low: 111, windDir: "SNW" },
-        ],
+        loaction: {
+            address: "",
+            lat: "0",
+            lon: "0",
+        },
+        at: [],
+        pressure: [],
+        wind: [],
     },
 };
 
 const STATE = {
     isFarenheight: false,
     isMph: false,
-    activeMetric: "at", //"pres", "wind"
+    activemeasure: null, //"temp", "pres", "wind"
     // isSplashActive: false,
-    dateStart: "06/04/2020",
-    dateEnd: "06/05/2020",
+    dateStartPicker: null,
+    dateEndPicker: null,
+    getDate: function (offset = 0) {
+        let date = new Date();
+        date = new Date(date.getTime() - offset * (1000 * 60 * 60 * 24));
+        const dd = ("0" + date.getDate()).toString().slice(-2);
+        const mm = ("0" + (date.getMonth() + 1)).toString().slice(-2);
+        const yyyy = date.getFullYear().toString();
+        return yyyy.concat("-", mm, "-", dd);
+    },
+    getDateStart: function () {
+        if (this.dateStartPicker) {
+            return this.dateStartPicker.getDate(true);
+        } else {
+            return this.getDate(7);
+        }
+    },
+    getDateEnd: function () {
+        if (this.dateEndPicker) {
+            return this.dateEndPicker.getDate(true);
+        } else {
+            return this.getDate();
+        }
+    },
+    getNumDays: function () {
+        start = new Date(this.getDateStart()).getTime();
+        end = new Date(this.getDateEnd()).getTime();
+        const diffTime = end - start;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    },
+    chartCtx: null,
+    chartLegend: null,
+    location: "New York City",
 };
 
 class WindRoseData {
@@ -65,44 +82,65 @@ class WindRoseData {
     NNE = 0;
 }
 
-function buildWindChartDataArr(dataSrc) {
+function buildWindChartDataArr(planets) {
     const windCrtdataArr = { labels: [], earth: [], mars: [] };
 
-    const earth = new WindRoseData();
-    const mars = new WindRoseData();
+    const windObjs = {
+        earth: new WindRoseData(),
+        mars: new WindRoseData(),
+    };
 
-    for (let i = 0; i < dataSrc.earth.length; i++) {
-        if (mars[dataSrc.mars[i].windDir] < dataSrc.mars[i].avg) {
-            mars[dataSrc.mars[i].windDir] = dataSrc.mars[i].avg;
+    for (let i = 0; i < STATE.getNumDays(); i++) {
+        for (let [planetName, planetData] of Object.entries(planets)) {
+            if (
+                windObjs[planetName][planetData[i].windDir] < planetData[i].avg
+            ) {
+                windObjs[planetName][planetData[i].windDir] = planetData[i].avg;
+            }
         }
 
-        if (earth[dataSrc.earth[i].windDir] < dataSrc.earth[i].avg) {
-            earth[dataSrc.earth[i].windDir] = dataSrc.earth[i].avg;
-        }
+        // if (earth[planets.earth[i].windDir] < planets.earth[i].avg) {
+        //     earth[planets.earth[i].windDir] = planets.earth[i].avg;
+        // }
     }
 
-    windCrtdataArr.mars = Object.values(mars);
-    windCrtdataArr.earth = Object.values(earth);
-    windCrtdataArr.labels = Object.keys(earth);
+    windCrtdataArr.mars = Object.values(windObjs.mars);
+    windCrtdataArr.earth = Object.values(windObjs.earth);
+    windCrtdataArr.labels = Object.keys(windObjs.earth);
 
     return windCrtdataArr;
 }
 
-function buildLineChartDataArr(dataSrc) {
-    const lnCrtdataArr = { labels: [], earth: [], mars: [] };
+function buildLineChartDataArr(planets, metric) {
+    const lnCrtdataArr = {
+        labels: [],
+        earth: [],
+        mars: [],
+    };
 
-    for (let i = 0; i < dataSrc.earth.length; i++) {
+    for (let i = 0; i < STATE.getNumDays(); i++) {
         lnCrtdataArr.labels.push(
-            dataSrc.earth[i].dd.concat("-", dataSrc.mars[i].dd)
+            planets.earth[i].utc
+                .getMonth()
+                .toString()
+                .concat(
+                    "-",
+                    planets.earth[i].utc.getDay(),
+                    " vs. ",
+                    planets.mars[i].sol
+                )
         );
-        lnCrtdataArr.mars.push(dataSrc.mars[i].avg);
-        lnCrtdataArr.earth.push(dataSrc.earth[i].avg);
+        for (let [planetName, planetData] of Object.entries(planets)) {
+            if (planetData[i][metric]) {
+                lnCrtdataArr[planetName].push(planetData[i][metric]);
+            }
+        }
     }
 
     return lnCrtdataArr;
 }
 
-function getChartData(metric) {
+function getChartData(measure) {
     /* Ask Matt about taking data strait from the DOM into function
      * Is this if statement relevant or silly?
      */
@@ -110,109 +148,324 @@ function getChartData(metric) {
     const data = { labels: [], datasets: [] };
 
     // validate datatype from DOM
-    if (metric != "at" && metric != "pressure" && metric != "wind") {
+    if (measure != "at" && measure != "pressure" && measure != "wind") {
         return data;
     }
 
     const dataSrc = {
-        mars: STORE.martianWeather[metric],
-        earth: STORE.earthWeather[metric],
+        mars: STORE.martianWeather[measure],
+        earth: STORE.earthWeather[measure],
     };
 
-    // if (dataSrc.earth.length != dataSrc.mars.length) {
-    //     return dataSets;
-    // }
-    let rawData = null;
-    if (metric == "wind") {
-        rawData = buildWindChartDataArr(dataSrc);
+    //If # of days retrieved are not = to the num days query, do not render this data set.
+    Object.keys(dataSrc).forEach((planet) => {
+        const len = STATE.getNumDays();
+        if (dataSrc[planet].length < len) {
+            for (let i = 0; i < len; i++) {
+                dataSrc[planet].push({ Error: "Missing Days" });
+            }
+            /* TODO: add unrliable data error here */
+        }
+    });
+
+    const metrics = ["avg"];
+
+    let dataArr = null;
+    if (measure == "wind") {
+        dataArr = buildWindChartDataArr(dataSrc);
     } else {
-        rawData = buildLineChartDataArr(dataSrc);
+        dataArr = buildLineChartDataArr(dataSrc, metrics);
     }
 
-    data.labels = rawData.labels;
+    data.labels = dataArr.labels;
 
     data.datasets.push({
         label: "mars",
-        data: rawData.mars,
+        data: dataArr.mars,
         borderWidth: 1,
     });
 
-    // data.datasets.push({
-    //     label: "earth",
-    //     data: rawData.earth,
-    //     borderWidth: 1,
-    // });
+    data.datasets.push({
+        label: "earth",
+        data: dataArr.earth,
+        borderWidth: 1,
+    });
 
     return data;
 }
 
-function pushMartianData(ResponseJson) {
-    for (i = 0, keys = Object.keys(ResponseJson); i < keys.length - 2; i++) {
-        STORE.martianWeather.at.push({
-            dd: keys[i],
-            avg: ResponseJson[keys[i]].AT.av,
-            high: ResponseJson[keys[i]].AT.mx,
-            low: ResponseJson[keys[i]].AT.mn,
+function pushMartianData(data) {
+    for (i = 0, keys = Object.keys(data); i < keys.length - 2; i++) {
+        try {
+            STORE.martianWeather.at.push({
+                sol: keys[i],
+                utc: data[keys[i]].Last_UTC,
+                avg: data[keys[i]].AT.av,
+                high: data[keys[i]].AT.mx,
+                low: data[keys[i]].AT.mn,
+            });
+        } catch (error) {
+            console.log(error);
+        }
+
+        try {
+            STORE.martianWeather.pressure.push({
+                sol: keys[i],
+                utc: data[keys[i]].Last_UTC,
+                avg: data[keys[i]].PRE.av,
+                high: data[keys[i]].PRE.mx,
+                low: data[keys[i]].PRE.mn,
+            });
+        } catch (error) {
+            console.log(error);
+        }
+        try {
+            STORE.martianWeather.wind.push({
+                utc: data[keys[i]].Last_UTC,
+                avg: data[keys[i]].HWS.av,
+                high: data[keys[i]].HWS.mx,
+                low: data[keys[i]].HWS.mn,
+                windDir: data[keys[i]].WD.most_common.compass_point,
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+}
+
+function degreesToBearing(deg) {
+    switch (true) {
+        case deg > 348.75 && deg <= 11.25:
+            dir = "N";
+            break;
+        case deg > 11.25 && deg <= 33.75:
+            dir = "NNE";
+            break;
+        case deg > 33.75 && deg <= 56.25:
+            dir = "NE";
+            break;
+        case deg > 56.25 && deg <= 78.75:
+            dir = "ENE";
+            break;
+        case deg > 78.75 && deg <= 101.25:
+            dir = "E";
+            break;
+        case deg > 101.25 && deg <= 123.75:
+            dir = "ESE";
+            break;
+        case deg > 123.75 && deg <= 146.25:
+            dir = "SE";
+            break;
+        case deg > 146.25 && deg <= 168.75:
+            dir = "SSE";
+            break;
+        case deg > 168.75 && deg <= 191.25:
+            dir = "S";
+            break;
+        case deg > 191.25 && deg <= 213.75:
+            dir = "SSW";
+            break;
+        case deg > 213.75 && deg <= 236.25:
+            dir = "SW";
+            break;
+        case deg > 236.25 && deg <= 258.75:
+            dir = "WSW";
+            break;
+        case deg > 258.75 && deg <= 281.25:
+            dir = "W";
+            break;
+        case deg > 281.25 && deg <= 303.75:
+            dir = "WNW";
+            break;
+        case deg > 303.75 && deg <= 326.25:
+            dir = "NW";
+            break;
+        case deg > 326.25 && deg <= 348.75:
+            dir = "NNW";
+            break;
+        default:
+            dir = null;
+            break;
+    }
+    return dir;
+}
+
+function pushTerranData(data) {
+    for (i = 0; i < data.length; i++) {
+        STORE.earthWeather.at.push({
+            utc: new Date(data[i].date),
+            avg: data[i].tavg,
+            high: data[i].tmax,
+            low: data[i].tmin,
         });
-        STORE.martianWeather.pressure.push({
-            dd: keys[i],
-            avg: ResponseJson[keys[i]].PRE.av,
-            high: ResponseJson[keys[i]].PRE.mx,
-            low: ResponseJson[keys[i]].PRE.mn,
+        STORE.earthWeather.pressure.push({
+            utc: new Date(data[i].date),
+            avg: data[i].pres,
         });
-        STORE.martianWeather.wind.push({
-            avg: ResponseJson[keys[i]].HWS.av,
-            high: ResponseJson[keys[i]].HWS.mx,
-            low: ResponseJson[keys[i]].HWS.mn,
-            windDir: ResponseJson[keys[i]].WD.most_common.compass_point,
+        STORE.earthWeather.wind.push({
+            utc: new Date(data[i].date),
+            avg: data[i].wspd,
+            windDir: degreesToBearing(data[i].wdir),
         });
     }
 }
 
 //API Calls
-function fetchMartianData() {
-    return (
-        fetch(
-            "https://api.nasa.gov/insight_weather/?api_key=DEMO_KEY&feedtype=json&ver=1.0"
-        )
-            .then((response) => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error(response.statusText);
-            })
-            // .then((responseJson) => pushMartianData(responseJson))
-            .catch((err) => console.log(err))
+function formatQueryParams(params) {
+    const queryItems = Object.keys(params).map(
+        (key) => `${key}=${params[key]}`
     );
+    return queryItems.join("&");
 }
 
-function fetchTerranData() {
-    var myHeaders = new Headers();
-    myHeaders.append("x-api-key", "BXfdILEuBoXF0cB2NIrZVc5ileNAC4lW");
-    myHeaders.append("Access-Control-Allow-Origin", "*");
-
-    var requestOptions = {
-        method: "GET",
-        headers: myHeaders,
-        redirect: "follow",
+function geolocate(location) {
+    let params = {
+        address: encodeURI(location),
+        key: "AIzaSyBDJyedOS2VN3Fxz4eutyeM1_grLUQfp7s",
     };
 
-    fetch(
-        "https://api.meteostat.net/v2/point/daily?lat=33.749&lon=-84.388&alt=336&start=2020-06-01&end=2020-06-18",
-        requestOptions
-    )
+    params = formatQueryParams(params);
+
+    return fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`)
         .then((response) => {
             if (response.ok) {
                 return response.json();
             }
             throw new Error(response.statusText);
         })
-        // .then((responseJson) => pushMartianData(responseJson))
         .catch((err) => console.log(err));
 }
 
+function filterDateRange(response, start, end) {}
+
+function fetchMartianData() {
+    const start = STATE.getDateStart();
+    const end = STATE.getDateEnd();
+
+    //prettier-ignore
+    let params = { 
+        api_key: "DEMO_KEY", 
+        feedtype: "json", 
+        ver: "1.0", 
+    };
+
+    params = formatQueryParams(params);
+
+    return fetch(`https://api.nasa.gov/insight_weather/?${params}`)
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error(
+                "Failed to retrieve Martian data from the NASA Insight program"
+            );
+        })
+        .then((response) => {
+            // for (let [key, value] of Object.keys(response)) {
+            //     if (moment.utc(value.Last_UTC).isAfter(end)) {
+            //         // filteredResponse.push(response[key]);
+            //     }
+            // }
+
+            return response;
+        })
+        .catch((err) => {
+            console.log(err);
+            return false;
+        });
+}
+
+function fetchTerranData() {
+    const headers = new Headers();
+    headers.append("x-api-key", "BXfdILEuBoXF0cB2NIrZVc5ileNAC4lW");
+    headers.append("Access-Control-Allow-Origin", "*");
+
+    const requestOptions = {
+        method: "GET",
+        headers: headers,
+        redirect: "follow",
+    };
+
+    let params = {
+        lat: STORE.earthWeather.loaction.lat,
+        lon: STORE.earthWeather.loaction.lon,
+        alt: 336,
+        start: STATE.getDateStart(),
+        end: STATE.getDateEnd(),
+    };
+
+    params = formatQueryParams(params);
+
+    return fetch(
+        `https://cors-anywhere.herokuapp.com/https://api.meteostat.net/v2/point/daily?${params}`,
+        requestOptions
+    )
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error(
+                "Failed to retrieve terran data from weather service."
+            );
+        })
+        .catch((err) => {
+            console.log(err);
+            return false;
+        });
+}
+
+function refreshDataArr() {
+    for (let [planetName, planetData] of Object.entries(STORE)) {
+        Object.keys(planetData).forEach((measure) => {
+            STORE[planetName][measure].length = 0;
+        });
+    }
+}
+
+function dataFetch() {
+    const location = STATE.location;
+
+    const terranRequest = geolocate(location).then((responseJson) => {
+        STORE.earthWeather.loaction.lat =
+            responseJson.results[0].geometry.location.lat;
+        STORE.earthWeather.loaction.lon =
+            responseJson.results[0].geometry.location.lng;
+        STORE.earthWeather.loaction.address =
+            responseJson.results[0].formatted_address;
+        return fetchTerranData(location);
+    });
+
+    const martianRequest = fetchMartianData();
+
+    return [martianRequest, terranRequest];
+}
+
+function updateData() {
+    refreshDataArr();
+
+    response = dataFetch();
+
+    return Promise.all(response).then(function (values) {
+        if (values[0]) {
+            pushMartianData(values[0]);
+        } else {
+            //Report Error to User
+        }
+        console.log(Object.keys(values[1]));
+        if (values[1]) {
+            pushTerranData(values[1].data);
+        } else {
+            //Report Error to User
+        }
+        return 0;
+    });
+}
+
 // Render
-function renderChart(ctx, data, metric) {
+function renderChart(measure) {
+    const data = getChartData(measure);
+    const ctx = STATE.chartCtx;
+
     const options = {
         // scales: {
         //     yAxes: [
@@ -225,14 +478,14 @@ function renderChart(ctx, data, metric) {
         // },
 
         legend: {
-            display: metric == "wind" ? false : true,
+            display: measure == "wind" ? false : true,
             position: "bottom",
         },
 
         legendCallback: function (chart) {
-            var text = [];
+            let text = [];
             text.push("<ul>");
-            for (var i = 0; i < chart.data.datasets.length; i++) {
+            for (let i = 0; i < chart.data.datasets.length; i++) {
                 text.push(`<li class="js-legend-item>"`);
                 text.push(
                     '<span style="background-color:' +
@@ -248,11 +501,21 @@ function renderChart(ctx, data, metric) {
         },
     };
 
-    return new Chart(ctx, {
+    const chart = new Chart(ctx, {
         data: data,
-        type: metric == "wind" ? "polarArea" : "line",
+        type: measure == "wind" ? "polarArea" : "line",
         options: options,
     });
+
+    // Generate HTML legend
+    STATE.chartLegend.html(chart.generateLegend());
+}
+
+function renderData() {
+    measure = STATE.activemeasure;
+    renderChart(measure);
+
+    //Desktop will need to render multiple charts.
 }
 
 function renderWindRose(ctx, data) {
@@ -281,20 +544,23 @@ function renderSplash() {
             <p>
                 Compare your local weather to the weather at Elysium
                 Planitia, Mars.
-                    </p>
+            </p>
             <form id="js-comp-earth-to-mars" class="container ctr-stacked" action="sumbit">
                 <label for="location">Select a location</label>
-                <select name="location" id="location-selector" required>
-                    <option value="nyc">New York City</option>
-                    <option value="la">Los Angeles</option>
-                </select>
+                <input type="text" name="location" id="js-location-selector" required>
                 <button type="submit">Compare to Mars</button>
             </form>
         </div>`);
+
+    // <select name="location" id="location-selector" required>
+    //     <option value="nyc">New York City</option>
+    //     <option value="la">Los Angeles</option>
+    // </select>
 }
 
-function render(metric = null) {
-    if (metric) {
+function render() {
+    measure = STATE.activemeasure;
+    if (measure) {
         const html = $("#js-content-wrapper").html(
             `
             <div>
@@ -308,21 +574,14 @@ function render(metric = null) {
                             <div>
                                 <div class="container date-picker">
                                     <label for="date-range">Date</label>
-                                    <fieldset name="date-range">
-                                        <input
-                                            type="date"
-                                            name="start-date"
-                                            id="js-start-date"
-                                            pattern="\d{4}-\d{2}-\d{2}"
-                                        />
-
-                                        <input
-                                            type="date"
-                                            name="end-date"
-                                            id="js-end-date"
-                                            pattern="\d{4}-\d{2}-\d{2}"
-                                        />
-                                    </fieldset>
+                                    <div>
+                                        <input type="text" class="form-control sr-only js-start-picker">
+                                        <div class="js-start-picker-container"></div>
+                                    </div>
+                                    <div>
+                                        <input type="text" class="form-control sr-only js-end-picker">
+                                        <div class="js-end-picker-container"></div>
+                                    </div>
                                 </div>
                                 <div class="container date-picker">
                                     <label for="date-range">Sol</label>
@@ -372,28 +631,51 @@ function render(metric = null) {
                     <div>
                         <button
                             type="button"
-                            class="js-metric-selector"
-                            data-metric="at"
+                            class="js-measure-selector"
+                            data-measure="at"
                         ></button>
                         <button
                             type="button"
-                            class="js-metric-selector"
-                            data-metric="pressure"
+                            class="js-measure-selector"
+                            data-measure="pressure"
                         ></button>
                         <button
                             type="button"
-                            class="js-metric-selector"
-                            data-metric="wind"
+                            class="js-measure-selector"
+                            data-measure="wind"
                         ></button>
                     </div>
                 </div>`
         );
-        const data = getChartData(metric);
-        const ctx = $(html).find("#myChart")[0].getContext("2d");
-        const chart = renderChart(ctx, data, metric);
 
-        // generate HTML legend
-        $(html).find("#legend").html(chart.generateLegend());
+        // Render the date Pickers
+        STATE.dateStartPicker = new Picker(
+            document.querySelector(".js-start-picker"),
+            {
+                container: ".js-start-picker-container",
+                inline: true,
+                rows: 1,
+                date: STATE.getDateStart(),
+                format: "YYYY-MM-DD",
+            }
+        );
+
+        STATE.dateEndPicker = new Picker(
+            document.querySelector(".js-end-picker"),
+            {
+                container: ".js-end-picker-container",
+                inline: true,
+                rows: 1,
+                date: STATE.getDateEnd(),
+                format: "YYYY-MM-DD",
+                align: "right",
+            }
+        );
+
+        //Render the Chart
+        STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
+        STATE.chartLegend = $(html).find("#legend");
+        renderData();
     } else {
         renderSplash();
     }
@@ -403,40 +685,35 @@ $(render());
 
 // Listeners
 
-(function watchCompare() {
-    $("#js-content-wrapper").on("click", "#js-comp-earth-to-mars", function (
+(function () {
+    //watch compare
+    $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (
         e
     ) {
         e.preventDefault();
-
-        const apiRequest1 = fetchMartianData();
-        const apiRequest2 = fetchTerranData();
-
-        // const combinedData = { apiRequest1: {}, apiRequest2: {} };
-
-        Promise.all([apiRequest1, apiRequest2]).then(function (values) {
-            // combinedData["apiRequest1"] = values[0];
-            // combinedData["apiRequest2"] = values[1];
-            // return combinedData;
-            pushMartianData(values[0]);
-            pushMartianData(values[1]);
+        STATE.location = $("#js-location-selector").val();
+        updateData().then(() => {
+            STATE.activemeasure = "at";
+            render();
         });
-
-        // fetchMartianData().then((data) => {
-        //     pushMartianData(data);
-        //     render("at");
-        // });
     });
 
-    return;
-})();
+    // return;
 
-(function watchMetric() {
-    $("#js-content-wrapper").on("click", ".js-metric-selector", function (e) {
+    //watch measure
+    $("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
         e.preventDefault();
-        const metric = $(this).attr("data-metric");
-        STATE.activeMetric = metric;
-        render(metric);
+        const measure = $(this).attr("data-measure");
+        STATE.activemeasure = measure;
+        renderData();
+    });
+
+    // watch go
+    $("#js-content-wrapper").on("click", "#js-go", function (e) {
+        e.preventDefault();
+        updateData().then(() => {
+            renderData();
+        });
     });
 })();
 
@@ -446,7 +723,7 @@ function legendClickCallback(event) {
     event = event || window.event;
 
     var target = event.target || event.srcElement;
-    while (target.nodeName !== "LI") {
+    while (target.nodeName !== "li") {
         target = target.parentElement;
     }
     var parent = target.parentElement;
