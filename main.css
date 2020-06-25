@@ -26,7 +26,14 @@ table {
 
 .wrapper {
     max-width: 520px;
-    margin: auto;
+    flex: 1;
+    /* margin: auto; */
+}
+
+.background-graphic {
+    background-image: url(assets/background.jpg);
+    background-size: cover;
+    background-position: center;
 }
 
 .bg-dark {

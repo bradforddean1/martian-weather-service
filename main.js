@@ -331,8 +331,6 @@ function geolocate(location) {
         .catch((err) => console.log(err));
 }
 
-function filterDateRange(response, start, end) {}
-
 function fetchMartianData() {
     const start = STATE.getDateStart();
     const end = STATE.getDateEnd();
@@ -535,16 +533,20 @@ function renderWindRose(ctx, data) {
 
 function renderSplash() {
     $("#js-content-wrapper").html(`
-        <div class="padded-container">
-            <p>
-                Compare your local weather to the weather at Elysium
-                Planitia, Mars.
-            </p>
-            <form id="js-comp-earth-to-mars" class="container ctr-stacked" action="sumbit">
-                <label for="location">Select a location</label>
-                <input type="text" name="location" id="js-location-selector" required>
-                <button type="submit">Compare to Mars</button>
-            </form>
+        <div class="background-graphic">
+            <div class="wrapper">
+                <div class="padded-container">
+                    <p>
+                        Compare your local weather to the weather at Elysium
+                        Planitia, Mars.
+                    </p>
+                    <form id="js-comp-earth-to-mars" class="container ctr-stacked" action="sumbit">
+                        <label for="location">Select a location</label>
+                        <input type="text" name="location" id="js-location-selector" required>
+                        <button type="submit">Compare to Mars</button>
+                    </form>
+                </div>
+            </div>
         </div>`);
 
     // <select name="location" id="location-selector" required>
@@ -558,89 +560,89 @@ function render() {
     if (measure) {
         const html = $("#js-content-wrapper").html(
             `
-            <div>
-                    <div class="bg-med padded-container">
-                        <h2>Select Date:</h2>
-                        <form
-                            id="js-date-picker"
-                            class="container ctr-justified"
-                            action="submit"
-                        >
-                            <div>
-                                <div class="container date-picker">
-                                    <label for="date-range">Date</label>
-                                    <div>
-                                        <input type="text" class="form-control sr-only js-start-picker">
-                                        <div class="js-start-picker-container"></div>
-                                    </div>
-                                    <div>
-                                        <input type="text" class="form-control sr-only js-end-picker">
-                                        <div class="js-end-picker-container"></div>
-                                    </div>
+            <div class ="wrapper">
+                <div class="bg-med padded-container">
+                    <h2>Select Date:</h2>
+                    <form
+                        id="js-date-picker"
+                        class="container ctr-justified"
+                        action="submit"
+                    >
+                        <div>
+                            <div class="container date-picker">
+                                <label for="date-range">Date</label>
+                                <div>
+                                    <input type="text" class="form-control sr-only js-start-picker">
+                                    <div class="js-start-picker-container"></div>
                                 </div>
-                                <div class="container date-picker">
-                                    <label for="date-range">Sol</label>
-                                    <fieldset name="date-range">
-                                        <input
-                                            type="date"
-                                            name="start-date"
-                                            id="js-start-date"
-                                            disabled
-                                        />
-
-                                        <input
-                                            type="date"
-                                            name="end-date"
-                                            id="js-end-date"
-                                            disabled
-                                        />
-                                    </fieldset>
+                                <div>
+                                    <input type="text" class="form-control sr-only js-end-picker">
+                                    <div class="js-end-picker-container"></div>
                                 </div>
                             </div>
-                            <button id="js-go" type="submit">
-                                go
-                            </button>
-                        </form>
-                    </div>
-                    <div class="bg-light">
-                        <div class="container ctr-center-content">
-                            <button>°C</button>
-                            <button>°F</button>
+                            <div class="container date-picker">
+                                <label for="date-range">Sol</label>
+                                <fieldset name="date-range">
+                                    <input
+                                        type="date"
+                                        name="start-date"
+                                        id="js-start-date"
+                                        disabled
+                                    />
+
+                                    <input
+                                        type="date"
+                                        name="end-date"
+                                        id="js-end-date"
+                                        disabled
+                                    />
+                                </fieldset>
+                            </div>
                         </div>
-                        <canvas id="myChart"></canvas>
-                        <!-- width="400" height="400" -->
-                        <div id="legend"></div>
-                        <table>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </table>
+                        <button id="js-go" type="submit">
+                            go
+                        </button>
+                    </form>
+                </div>
+                <div class="bg-light">
+                    <div class="container ctr-center-content">
+                        <button>°C</button>
+                        <button>°F</button>
                     </div>
-                    <div>
-                        <button
-                            type="button"
-                            class="js-measure-selector"
-                            data-measure="at"
-                        ></button>
-                        <button
-                            type="button"
-                            class="js-measure-selector"
-                            data-measure="pressure"
-                        ></button>
-                        <button
-                            type="button"
-                            class="js-measure-selector"
-                            data-measure="wind"
-                        ></button>
-                    </div>
-                </div>`
+                    <canvas id="myChart"></canvas>
+                    <!-- width="400" height="400" -->
+                    <div id="legend"></div>
+                    <table>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <button
+                        type="button"
+                        class="js-measure-selector"
+                        data-measure="at"
+                    ></button>
+                    <button
+                        type="button"
+                        class="js-measure-selector"
+                        data-measure="pressure"
+                    ></button>
+                    <button
+                        type="button"
+                        class="js-measure-selector"
+                        data-measure="wind"
+                    ></button>
+                </div>
+            </div>`
         );
 
         // Render the date Pickers
