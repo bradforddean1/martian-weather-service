@@ -1,8 +1,3 @@
-// object approach
-// objects and events
-// date picker
-// legend
-
 // STORE
 const STORE = {
     martianWeather: {
@@ -715,6 +710,12 @@ $(render());
             renderData();
         });
     });
+
+    //watch legend call back items
+    $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
+        e.preventDefault();
+        legendClickCallback(e);
+    });
 })();
 
 /* Maybe Matt can help walk through this */
@@ -743,59 +744,4 @@ function legendClickCallback(event) {
     }
 }
 
-(function watchlegendItems() {
-    $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
-        e.preventDefault();
-        legendClickCallback(e);
-    });
-})();
-
-//validate Location
-//validate geoLaction via Geocode API
-//render error intermodal
-//else render Main Page starting temperture data.
-
-//getEarthWeather
-//fetch from api
-//update store with weather info
-
-// function watchLocation {}
-//onclicke Event
-//collect input
-//call validate lcoation
-//call getEarthWeather
-//call getMarsWeather
-
-//if validate weather false
-//render error intermodal
-//else
-//render(temp)
-
-//function watchTempUnit
-//on click
-//update store tempUnit
-
-// iffe
-// (function ($) {
-//     $("#call_api").on("click", (e) => {
-//         let promise = new Promise((res, rej) => {
-//             $.ajax({
-//                 headers: {
-//                     accept: "application/json; odata=verbose",
-//                 },
-//                 type: "GET",
-//                 url:
-//                     "https: //api.nasa.gov/insight_weather/?api_key=DEMO_KEY&feedtype=json&ver=1.0",
-//                 success: (data) => {
-//                     console.log(data);
-//                     res();
-//                 },
-//                 error: (error) => {
-//                     console.log(error);
-//                     rej();
-//                 },
-//             });
-//         });
-//         return promise;
-//     });
-// })(window.jQuery);
+(function watchlegendItems() {})();
