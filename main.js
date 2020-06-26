@@ -481,7 +481,7 @@ function renderChart(measure) {
             let text = [];
             text.push("<ul>");
             for (let i = 0; i < chart.data.datasets.length; i++) {
-                text.push(`<li class="js-legend-item>"`);
+                text.push(`<li class="js-legend-item">`);
                 text.push(
                     '<span style="background-color:' +
                         chart.data.datasets[i].borderColor +
@@ -697,7 +697,7 @@ $(render());
 
     //watch measure
     $("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
-        e.preventDefault();
+        // e.preventDefault();
         const measure = $(this).attr("data-measure");
         STATE.activemeasure = measure;
         renderData();
@@ -713,7 +713,7 @@ $(render());
 
     //watch legend call back items
     $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
-        e.preventDefault();
+        // e.preventDefault();
         legendClickCallback(e);
     });
 })();
