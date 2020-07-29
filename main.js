@@ -6,7 +6,7 @@ const STORE = {
         wind: [],
     },
     earthWeather: {
-        loaction: {
+        location: {
             address: "",
             lat: "0",
             lon: "0",
@@ -15,6 +15,68 @@ const STORE = {
         pressure: [],
         wind: [],
     },
+
+    getAverage: function (planet, measure) {
+        if (measure != "at" && measure != "pressure") {
+            return "-";
+        }
+
+        if (planet != "martianWeather" && planet != "earthWeather") {
+            return "-";
+        }
+
+        let total = 0;
+        let count = 0;
+        for (const rot of this[planet][measure]) {
+            if (rot.avg) {
+                total += rot.avg;
+                count += 1;
+            } else {
+                return "-";
+            }
+        }
+
+        return Math.round(total / count).toString();
+    },
+    getMax: function (planet, measure) {
+        if (measure != "at" && measure != "pressure") {
+            return "-";
+        }
+
+        if (planet != "martianWeather" && planet != "earthWeather") {
+            return "-";
+        }
+
+        const all = [];
+        for (const rot of this[planet][measure]) {
+            if (rot.high) {
+                all.push(rot.high);
+            } else {
+                return "-";
+            }
+        }
+        return Math.round(Math.max(...all)).toString();
+    },
+    getMin: function (planet, measure) {
+        if (measure != "at" && measure != "pressure") {
+            return "-";
+        }
+
+        if (planet != "martianWeather" && planet != "earthWeather") {
+            return "-";
+        }
+
+        const all = [];
+        for (const rot of this[planet][measure]) {
+            if (rot.low) {
+                all.push(rot.low);
+            } else {
+                return "-";
+            }
+        }
+
+        return Math.round(Math.min(...all)).toString();
+    },
 };
 
 const STATE = {
@@ -22,40 +84,67 @@ const STATE = {
     isMph: false,
     activemeasure: null, //"temp", "pres", "wind"
     // isSplashActive: false,
-    dateStartPicker: null,
-    dateEndPicker: null,
-    getDate: function (offset = 0) {
-        let date = new Date();
-        date = new Date(date.getTime() - offset * (1000 * 60 * 60 * 24));
-        const dd = ("0" + date.getDate()).toString().slice(-2);
-        const mm = ("0" + (date.getMonth() + 1)).toString().slice(-2);
-        const yyyy = date.getFullYear().toString();
-        return yyyy.concat("-", mm, "-", dd);
+    dateStart: null,
+    dateEnd: null,
+    solStart: null,
+    solEnd: null,
+    setDateStart: function (date) {
+        this.dateStart = moment(date);
+        this.solStart =
+            this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
+            this.getNumDays();
     },
-    getDateStart: function () {
-        if (this.dateStartPicker) {
-            return this.dateStartPicker.getDate(true);
+    setDateEnd: function (date) {
+        this.dateEnd = moment(date);
+        this.solEnd = this.utcToMartianDate(this.dateEnd);
+    },
+    getSolStart: function () {
+        if (!this.solStart) {
+            this.solStart =
+                this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
+                this.getNumDays();
+            return this.solStart;
         } else {
-            return this.getDate(7);
+            return this.solStart;
         }
     },
-    getDateEnd: function () {
-        if (this.dateEndPicker) {
-            return this.dateEndPicker.getDate(true);
-        } else {
-            return this.getDate();
+    getSolEnd: function () {
+        if (!this.solEnd) {
+            this.solEnd = this.utcToMartianDate(this.dateEnd);
         }
+        return this.solEnd;
+    },
+    getDateStart: function (format = null) {
+        if (!this.dateStart) {
+            const date = moment().subtract(6, "days");
+            this.dateStart = date;
+        }
+
+        if (format) {
+            return this.dateStart.format(format);
+        } else {
+            return this.dateStart;
+        }
+    },
+    getDateEnd: function (format) {
+        if (!this.dateEnd) {
+            const date = moment();
+            this.dateEnd = date;
+        }
+
+        return this.dateEnd.format(format);
     },
     getNumDays: function () {
-        start = new Date(this.getDateStart()).getTime();
-        end = new Date(this.getDateEnd()).getTime();
-        const diffTime = end - start;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
+        diffDays = this.dateEnd.diff(this.dateStart, "days");
+        return diffDays + 1;
+    },
+    utcToMartianDate: function (utc) {
+        const beginTimeKeep = moment("2018-11-26");
+        const sol = Math.abs(beginTimeKeep.diff(utc, "days")) / 1.0274912517;
+        return Math.floor(sol);
     },
     chartCtx: null,
     chartLegend: null,
-    location: "New York City",
 };
 
 class WindRoseData {
@@ -113,33 +202,35 @@ function buildLineChartDataArr(planets, metric) {
         mars: [],
     };
 
-    for (let i = 0; i < STATE.getNumDays(); i++) {
+    function getSol(i) {
+        if (!planets.mars[i].sol) {
+            return "na";
+        }
+
+        return planets.mars[i].sol;
+    }
+
+    for (
+        let i = 0, date = moment(STATE.getDateStart());
+        i < STATE.getNumDays();
+        i++
+    ) {
+        console.log(STATE.getNumDays());
+
         lnCrtdataArr.labels.push(
-            planets.earth[i].utc
-                .getMonth()
-                .toString()
-                .concat(
-                    "-",
-                    planets.earth[i].utc.getDay(),
-                    " vs. ",
-                    planets.mars[i].sol
-                )
+            date.format("M-D").toString().concat(" vs. ", getSol(i))
+            //get UTC from and compare to range...
         );
         for (let [planetName, planetData] of Object.entries(planets)) {
-            if (planetData[i][metric]) {
-                lnCrtdataArr[planetName].push(planetData[i][metric]);
-            }
+            lnCrtdataArr[planetName].push(planetData[i][metric]);
         }
+        date.add(1, "days");
     }
 
     return lnCrtdataArr;
 }
 
 function getChartData(measure) {
-    /* Ask Matt about taking data strait from the DOM into function
-     * Is this if statement relevant or silly?
-     */
-
     const data = { labels: [], datasets: [] };
 
     // validate datatype from DOM
@@ -159,7 +250,7 @@ function getChartData(measure) {
             for (let i = 0; i < len; i++) {
                 dataSrc[planet].push({ Error: "Missing Days" });
             }
-            /* TODO: add unrliable data error here */
+            /* TODO: add unreliable data error here */
         }
     });
 
@@ -178,12 +269,18 @@ function getChartData(measure) {
         label: "mars",
         data: dataArr.mars,
         borderWidth: 1,
+        backgroundColor: "rgba(192, 77, 15, 0.3)",
+        borderColor: "#FF6700",
+        pointBackgroundColor: "#FF6700",
     });
 
     data.datasets.push({
         label: "earth",
         data: dataArr.earth,
         borderWidth: 1,
+        backgroundColor: "rgba(0, 77, 201, 0.3)",
+        borderColor: "#004DC9",
+        pointBackgroundColor: "#2C7BFA",
     });
 
     return data;
@@ -331,15 +428,10 @@ function geolocate(location) {
         .catch((err) => console.log(err));
 }
 
-function filterDateRange(response, start, end) {}
-
 function fetchMartianData() {
-    const start = STATE.getDateStart();
-    const end = STATE.getDateEnd();
-
     //prettier-ignore
     let params = { 
-        api_key: "DEMO_KEY", 
+        api_key: "JRPWKpyWr5JcEdUsLMypoII5iBeMaSn1Oy94DnkF", 
         feedtype: "json", 
         ver: "1.0", 
     };
@@ -373,7 +465,7 @@ function fetchMartianData() {
 function fetchTerranData() {
     const headers = new Headers();
     headers.append("x-api-key", "BXfdILEuBoXF0cB2NIrZVc5ileNAC4lW");
-    headers.append("Access-Control-Allow-Origin", "*");
+    // headers.append("Access-Control-Allow-Origin", "*");
 
     const requestOptions = {
         method: "GET",
@@ -382,11 +474,11 @@ function fetchTerranData() {
     };
 
     let params = {
-        lat: STORE.earthWeather.loaction.lat,
-        lon: STORE.earthWeather.loaction.lon,
+        lat: STORE.earthWeather.location.lat,
+        lon: STORE.earthWeather.location.lon,
         alt: 336,
-        start: STATE.getDateStart(),
-        end: STATE.getDateEnd(),
+        start: STATE.getDateStart("YYYY-MM-DD"),
+        end: STATE.getDateEnd("YYYY-MM-DD"),
     };
 
     params = formatQueryParams(params);
@@ -418,14 +510,14 @@ function refreshDataArr() {
 }
 
 function dataFetch() {
-    const location = STATE.location;
+    const location = STORE.earthWeather.location.address;
 
     const terranRequest = geolocate(location).then((responseJson) => {
-        STORE.earthWeather.loaction.lat =
+        STORE.earthWeather.location.lat =
             responseJson.results[0].geometry.location.lat;
-        STORE.earthWeather.loaction.lon =
+        STORE.earthWeather.location.lon =
             responseJson.results[0].geometry.location.lng;
-        STORE.earthWeather.loaction.address =
+        STORE.earthWeather.location.address =
             responseJson.results[0].formatted_address;
         return fetchTerranData(location);
     });
@@ -446,7 +538,6 @@ function updateData() {
         } else {
             //Report Error to User
         }
-        console.log(Object.keys(values[1]));
         if (values[1]) {
             pushTerranData(values[1].data);
         } else {
@@ -462,40 +553,43 @@ function renderChart(measure) {
     const ctx = STATE.chartCtx;
 
     const options = {
-        // scales: {
-        //     yAxes: [
-        //         {
-        //             ticks: {
-        //                 beginAtZero: false,
-        //             },
-        //         },
-        //     ],
-        // },
-
         legend: {
             display: measure == "wind" ? false : true,
             position: "bottom",
         },
 
         legendCallback: function (chart) {
-            let text = [];
-            text.push("<ul>");
-            for (let i = 0; i < chart.data.datasets.length; i++) {
-                text.push(`<li class="js-legend-item">`);
-                text.push(
-                    '<span style="background-color:' +
-                        chart.data.datasets[i].borderColor +
-                        '">' +
-                        chart.data.datasets[i].label +
-                        "</span>"
-                );
-                text.push("</li>");
-            }
-            text.push("</ul>");
-            return text.join("");
+            //chart.data.datasets.length
+            return `<table>
+                        <thead>
+                            <th></td>
+                            <th>min</td>
+                            <th>avg</td>
+                            <th>max</td>
+                        </thead>
+                        <tr class="mars">
+                            <th class="js-legend-item"${console.log(
+                                chart
+                            )}>mars</td>
+                            <td>${STORE.getMin("martianWeather", measure)}</td>
+                            <td>${STORE.getAverage(
+                                "martianWeather",
+                                measure
+                            )}</td>
+                            <td>${STORE.getMax("martianWeather", measure)}</td>
+                        </tr>
+                        <tr class = "earth">
+                            <th class="js-legend-item">earth</td>
+                            <td>${STORE.getMin("earthWeather", measure)}</td>
+                            <td>${STORE.getAverage(
+                                "earthWeather",
+                                measure
+                            )}</td>
+                            <td>${STORE.getMax("earthWeather", measure)}</td>
+                        </tr>
+                    </table>`;
         },
     };
-
     const chart = new Chart(ctx, {
         data: data,
         type: measure == "wind" ? "polarArea" : "line",
@@ -507,10 +601,43 @@ function renderChart(measure) {
 }
 
 function renderData() {
-    measure = STATE.activemeasure;
-    renderChart(measure);
+    const measure = STATE.activemeasure;
 
-    //Desktop will need to render multiple charts.
+    function getUnitContainer() {
+        if (measure == "at") {
+            return `
+            <div class="container unit">
+                <button class="left">°C</button>
+                <button class="right">°F</button>
+            </div>`;
+        }
+        if (measure == "pressure") {
+            return `
+            <div class="container unit">
+                <button>hPh</button>
+            </div>`;
+        }
+        if (measure == "wind") {
+            return `
+            <div class="container unit">
+                <button class="left">kPh</button>
+                <button class="right">mPh</button>
+            </div>`;
+        }
+    }
+
+    return `
+        <div class='container graph'>
+            <span>
+            ${STATE.getDateStart("M/D/YY")}
+            -
+            ${STATE.getDateEnd("M/D/YY")}
+            </span>
+            ${getUnitContainer()}
+            <canvas id="myChart"></canvas>
+            <!-- width="400" height="400" -->
+            <div class="legend" id="legend"></div>
+        </div>`;
 }
 
 function renderWindRose(ctx, data) {
@@ -535,17 +662,30 @@ function renderWindRose(ctx, data) {
 
 function renderSplash() {
     $("#js-content-wrapper").html(`
-        <div class="padded-container">
-            <p>
-                Compare your local weather to the weather at Elysium
-                Planitia, Mars.
-            </p>
-            <form id="js-comp-earth-to-mars" class="container ctr-stacked" action="sumbit">
-                <label for="location">Select a location</label>
-                <input type="text" name="location" id="js-location-selector" required>
-                <button type="submit">Compare to Mars</button>
-            </form>
-        </div>`);
+        <header class="bg-dark">
+            <div class="container">
+                <h1>Martian Weather Service</h1>
+            </div>
+        </header>
+        <hr>
+        <main class="container fill">
+            <div class="graphic-back fill">
+                <div class="gradient-back"></div>
+                <div class="wrapper">
+                    <form id="js-comp-earth-to-mars" class="container splash-content action="sumbit">
+                        <div class="container vbox">
+                            <p class="splash-summary">
+                                Compare your local weather to the weather at Elysium
+                                Planitia, Mars.
+                            </p>
+                            <input type="text" name="location" id="js-location-selector" placeholder="Type a location..." required>
+                        </div>
+                        <button type="submit">Compare to Mars</button>
+                    </form>
+                </div>
+            </div>
+        </main>    
+    `);
 
     // <select name="location" id="location-selector" required>
     //     <option value="nyc">New York City</option>
@@ -555,122 +695,138 @@ function renderSplash() {
 
 function render() {
     measure = STATE.activemeasure;
+
+    function isMobNavButSelect(option, element) {
+        if (option == STATE.activemeasure) {
+            if (element == "button") {
+                return "mobnav-button-selected";
+            }
+            if (element == "span") {
+                return "mobnav-span-selected";
+            }
+        }
+        return "";
+    }
+
     if (measure) {
         const html = $("#js-content-wrapper").html(
             `
-            <div>
-                    <div class="bg-med padded-container">
-                        <h2>Select Date:</h2>
+            <header class="bg-dark">
+                <div class="container">
+                    <h2><span class="caption">comparing to:</span>${
+                        STORE.earthWeather.location.address
+                    }</h2>
+                </div>
+            </header>
+            <main>
+                <div class ="wrapper">
+                    <div class="container date-selector">
+                        <h3>Select Date Range:</h3>
                         <form
                             id="js-date-picker"
                             class="container ctr-justified"
                             action="submit"
                         >
-                            <div>
+                            <div class="container date-range-picker">
                                 <div class="container date-picker">
-                                    <label for="date-range">Date</label>
-                                    <div>
-                                        <input type="text" class="form-control sr-only js-start-picker">
-                                        <div class="js-start-picker-container"></div>
-                                    </div>
-                                    <div>
-                                        <input type="text" class="form-control sr-only js-end-picker">
-                                        <div class="js-end-picker-container"></div>
-                                    </div>
+                                    <input
+                                        type="date"
+                                        name="start-date"
+                                        id="js-start-date"
+                                        class="js-date-selector"
+                                        value="${STATE.getDateStart(
+                                            "YYYY-MM-DD"
+                                        )}"
+                                        max="${moment().format("YYYY-MM-DD")}"
+                                        min="${moment()
+                                            .subtract(6, "days")
+                                            .format("YYYY-MM-DD")}"
+                                    />
+                                    <span 
+                                        class="sol" 
+                                        id="js-sol-start"
+                                    >Sol ${STATE.getSolStart()}
+                                    </span>
                                 </div>
                                 <div class="container date-picker">
-                                    <label for="date-range">Sol</label>
-                                    <fieldset name="date-range">
-                                        <input
-                                            type="date"
-                                            name="start-date"
-                                            id="js-start-date"
-                                            disabled
-                                        />
-
-                                        <input
-                                            type="date"
-                                            name="end-date"
-                                            id="js-end-date"
-                                            disabled
-                                        />
-                                    </fieldset>
+                                    <input
+                                        type="date"
+                                        name="end-date"
+                                        id="js-end-date"
+                                        class="js-date-selector"
+                                        value="${STATE.getDateEnd(
+                                            "YYYY-MM-DD"
+                                        )}"
+                                        max="${moment().format("YYYY-MM-DD")}"
+                                        min="${moment()
+                                            .subtract(6, "days")
+                                            .format("YYYY-MM-DD")}"
+                                    />
+                                    <span 
+                                        class="sol"
+                                        id="js-sol-end"
+                                    >Sol ${STATE.getSolEnd()}
+                                    </span>
                                 </div>
                             </div>
-                            <button id="js-go" type="submit">
-                                go
-                            </button>
                         </form>
                     </div>
-                    <div class="bg-light">
-                        <div class="container ctr-center-content">
-                            <button>°C</button>
-                            <button>°F</button>
+                    ${renderData()}
+                    <div class="mobile-nav">
+                        <div class="container-back"></div>
+                        <div class="container">
+                            <div class="bbox" >
+                                <button
+                                    type="button"
+                                    class="js-measure-selector ${isMobNavButSelect(
+                                        "at",
+                                        "button"
+                                    )}"
+                                    data-measure="at"
+                                ></button>
+                                <span class="${isMobNavButSelect(
+                                    "at",
+                                    "span"
+                                )}">°C/°F</span>
+                            </div>
+                            <div class="bbox">
+                                <button
+                                    type="button"
+                                    class="js-measure-selector ${isMobNavButSelect(
+                                        "pressure",
+                                        "button"
+                                    )}"
+                                    data-measure="pressure"
+                                ></button>
+                                <span class="${isMobNavButSelect(
+                                    "pressure",
+                                    "span"
+                                )}">hPa</span>
+                            </div>
+                            <div class="bbox">
+                                <button
+                                    type="button"
+                                    class="js-measure-selector ${isMobNavButSelect(
+                                        "wind",
+                                        "button"
+                                    )}"
+                                    data-measure="wind"
+                                ></button>
+                                <span class="${isMobNavButSelect(
+                                    "wind",
+                                    "span"
+                                )}">Wind</span>
+                            </div>    
                         </div>
-                        <canvas id="myChart"></canvas>
-                        <!-- width="400" height="400" -->
-                        <div id="legend"></div>
-                        <table>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </table>
                     </div>
-                    <div>
-                        <button
-                            type="button"
-                            class="js-measure-selector"
-                            data-measure="at"
-                        ></button>
-                        <button
-                            type="button"
-                            class="js-measure-selector"
-                            data-measure="pressure"
-                        ></button>
-                        <button
-                            type="button"
-                            class="js-measure-selector"
-                            data-measure="wind"
-                        ></button>
-                    </div>
-                </div>`
+                </div>
+            </main>`
         );
 
-        // Render the date Pickers
-        STATE.dateStartPicker = new Picker(
-            document.querySelector(".js-start-picker"),
-            {
-                container: ".js-start-picker-container",
-                inline: true,
-                rows: 1,
-                date: STATE.getDateStart(),
-                format: "YYYY-MM-DD",
-            }
-        );
-
-        STATE.dateEndPicker = new Picker(
-            document.querySelector(".js-end-picker"),
-            {
-                container: ".js-end-picker-container",
-                inline: true,
-                rows: 1,
-                date: STATE.getDateEnd(),
-                format: "YYYY-MM-DD",
-                align: "right",
-            }
-        );
-
-        //Render the Chart
         STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
         STATE.chartLegend = $(html).find("#legend");
-        renderData();
+
+        renderChart(measure); //Desktop will need to render multiple charts.
     } else {
         renderSplash();
     }
@@ -686,7 +842,7 @@ $(render());
         e
     ) {
         e.preventDefault();
-        STATE.location = $("#js-location-selector").val();
+        STORE.earthWeather.location.address = $("#js-location-selector").val();
         updateData().then(() => {
             STATE.activemeasure = "at";
             render();
@@ -700,14 +856,16 @@ $(render());
         // e.preventDefault();
         const measure = $(this).attr("data-measure");
         STATE.activemeasure = measure;
-        renderData();
+        render();
     });
 
-    // watch go
-    $("#js-content-wrapper").on("click", "#js-go", function (e) {
-        e.preventDefault();
+    // watch daterange
+    $("#js-content-wrapper").on("change", ".js-date-selector", function (e) {
+        STATE.setDateStart($("#js-start-date").val());
+        STATE.setDateEnd($("#js-end-date").val());
+
         updateData().then(() => {
-            renderData();
+            render();
         });
     });
 
@@ -715,16 +873,15 @@ $(render());
     $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
         // e.preventDefault();
         legendClickCallback(e);
+        alert("hello");
     });
 })();
-
-/* Maybe Matt can help walk through this */
 
 function legendClickCallback(event) {
     event = event || window.event;
 
     var target = event.target || event.srcElement;
-    while (target.nodeName !== "li") {
+    while (target.nodeName !== "th") {
         target = target.parentElement;
     }
     var parent = target.parentElement;
