@@ -103,6 +103,7 @@ const STATE = {
             this.solStart =
                 this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
                 this.getNumDays();
+            return this.solStart;
         } else {
             return this.solStart;
         }
@@ -113,27 +114,29 @@ const STATE = {
         }
         return this.solEnd;
     },
-    getDateStart: function (format) {
-        if (this.dateStart) {
+    getDateStart: function (format = null) {
+        if (!this.dateStart) {
+            const date = moment().subtract(6, "days");
+            this.dateStart = date;
+        }
+
+        if (format) {
             return this.dateStart.format(format);
         } else {
-            const date = moment().subtract(7, "days");
-            this.dateStart = date;
-            return date.format(format);
+            return this.dateStart;
         }
     },
     getDateEnd: function (format) {
-        if (this.dateEnd) {
-            return this.dateEnd.format(format);
-        } else {
+        if (!this.dateEnd) {
             const date = moment();
             this.dateEnd = date;
-            return date.format(format);
         }
+
+        return this.dateEnd.format(format);
     },
     getNumDays: function () {
         diffDays = this.dateEnd.diff(this.dateStart, "days");
-        return diffDays;
+        return diffDays + 1;
     },
     utcToMartianDate: function (utc) {
         const beginTimeKeep = moment("2018-11-26");
@@ -207,16 +210,21 @@ function buildLineChartDataArr(planets, metric) {
         return planets.mars[i].sol;
     }
 
-    for (let i = 0; i < STATE.getNumDays(); i++) {
+    for (
+        let i = 0, date = moment(STATE.getDateStart());
+        i < STATE.getNumDays();
+        i++
+    ) {
+        console.log(STATE.getNumDays());
+
         lnCrtdataArr.labels.push(
-            STATE.getDateStart("M-D").toString().concat(" vs. ", getSol(i))
+            date.format("M-D").toString().concat(" vs. ", getSol(i))
             //get UTC from and compare to range...
         );
         for (let [planetName, planetData] of Object.entries(planets)) {
-            if (planetData[i][metric]) {
-                lnCrtdataArr[planetName].push(planetData[i][metric]);
-            }
+            lnCrtdataArr[planetName].push(planetData[i][metric]);
         }
+        date.add(1, "days");
     }
 
     return lnCrtdataArr;
@@ -868,8 +876,6 @@ $(render());
         alert("hello");
     });
 })();
-
-/* Maybe Matt can help walk through this */
 
 function legendClickCallback(event) {
     event = event || window.event;
