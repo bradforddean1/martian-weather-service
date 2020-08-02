@@ -3,28 +3,23 @@
 }
 
 /* text Styles */
-
 @import url("https://fonts.googleapis.com/css2?family=Abel&display=swap");
 @import url("https://use.typekit.net/lrv4rll.css");
 
 body {
-    font-family: helvetica, sans-serif;
-    font-weight: 300;
+    font-family: sofia-pro, sans-serif;
     font-style: normal;
-    font-size: 18px;
-    line-height: 28px;
+    font-weight: 300;
+    font-size: 20px;
+    line-height: 23px;
+    /* or 115% */
     text-align: center;
     letter-spacing: 0.05em;
-
-    /* tech blue */
-
-    color: #849dba;
+    color: #849dba; /* tech blue */
 }
 
 h1 {
-    font-family: Abel;
-    font-style: normal;
-    font-weight: normal;
+    font-family: "Abel", sans-serif;
     font-size: 28px;
     line-height: 36px;
     text-align: center;
@@ -36,47 +31,65 @@ h1 {
 
 h2,
 input {
-    font-family: helvetica, sans-serif;
-    font-weight: 500;
+    font-family: sofia-pro, sans-serif;
     font-style: normal;
-    font-size: 18px;
-    line-height: 24px;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 108%;
     color: #d0dce7;
+}
+
+.date-selector h3 {
+    font-size: 14px;
+    font-family: sofia-pro, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+.date-picker input {
+    font-family: Abel;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.sol {
+    font-family: Abel;
+    font-size: 12px;
+    line-height: 15px;
+    color: #ff6700;
 }
 
 .caption {
     display: block;
-    font-family: Helvetica;
-    font-style: normal;
-    font-weight: 300;
+    font-weight: normal;
     font-size: 14px;
-    line-height: 19px;
+    line-height: 14px;
     color: #849dba;
     opacity: 0.8;
     margin-bottom: 10px;
 }
 
-thead {
-    font-family: Helvetica, sans-serif;
-    font-style: normal;
-    font-weight: normal;
-    font-size: 9px;
-    line-height: 11px;
-    color: #263951;
-}
-
 tr {
-    font-family: Helvetica;
-    font-style: normal;
-    font-weight: normal;
+    font-family: Helvetica, sans-serif;
     font-size: 18px;
     line-height: 21px;
     text-align: center;
 }
 
+thead {
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 15px;
+    color: #849dba;
+    opacity: 0.5;
+}
+
 tr td {
-    font-size: 10px;
-    line-height: 12px;
+    font-family: sofia-pro, sans-serif;
+    font-size: 14px;
+    line-height: 14px;
 }
 
 tr.earth {
@@ -91,10 +104,24 @@ tr.mars {
 
 .graphic-back {
     position: relative;
-    background-image: url(assets/background.jpg);
+    background-image: url(assets/planet_bg_mob.png);
     background-size: cover;
     background-position: center;
+    background-position-x: center;
+    background-position-y: center;
     z-index: 1;
+}
+
+@media all and (min-width: 480px) {
+    .graphic-back {
+        background-image: url(assets/planet_bg_tab.png);
+    }
+}
+
+@media all and (min-width: 1100px) {
+    .graphic-back {
+        background-image: url(assets/planet_bg_full.png);
+    }
 }
 
 .gradient-back {
@@ -115,6 +142,10 @@ tr.mars {
     background-color: #000;
 }
 
+.bg-secondary {
+    background-color: #070c0f;
+}
+
 .bg-light {
     background-color: #e5e5e5;
 }
@@ -128,10 +159,17 @@ tr.mars {
 }
 
 .wrapper {
-    max-width: 520px;
+    min-width: 320px;
     /* flex: 1; */
     margin: auto;
     height: 100%;
+}
+
+.centered-content {
+    width: 560px;
+    max-width: 560px;
+    min-width: 320px;
+    margin: 0 auto;
 }
 
 .container {
@@ -147,8 +185,8 @@ tr.mars {
     flex-direction: column;
     justify-content: space-between;
     align-content: space-between;
-    height: calc(100% - 40px);
-    padding: 20px;
+    height: calc(100% - 20px);
+    padding: 0 20px;
     flex: 1;
 }
 
@@ -157,22 +195,30 @@ tr.mars {
 }
 
 header .container {
-    min-height: 100px;
-    align-items: center;
+    min-height: 65px;
     justify-content: center;
     margin-top: 45px;
+}
+
+header.splash .container {
+    min-height: 100px;
+    align-items: center;
+}
+
+.horz-borders {
+    border-top: 1px solid rgb(132, 157, 186, 0.3);
+    border-bottom: 1px solid rgb(132, 157, 186, 0.3);
 }
 
 .date-selector {
     flex-direction: column;
     justify-content: left;
     padding: 20px;
-    border-top: 1px solid rgb(132, 157, 186, 0.3);
-    border-bottom: 1px solid rgb(132, 157, 186, 0.3);
 }
 
 .date-selector h3 {
     text-align: left;
+    margin-bottom: 12px;
 }
 
 .date-range-picker {
@@ -184,15 +230,15 @@ header .container {
     flex: 1;
     text-align: left;
     flex-direction: column;
+    max-width: 48.5%;
+}
+
+::-webkit-calendar-picker-indicator {
+    filter: invert(0.86);
 }
 
 .sol {
-    font-family: Abel;
-    font-style: normal;
-    font-weight: normal;
-    font-size: 12px;
-    line-height: 15px;
-    color: #ff6700;
+    margin-top: 8px;
 }
 
 .graph {
@@ -222,8 +268,27 @@ header .container {
     border-radius: 0 90px 90px 0;
 }
 
+.unit button.toggle-on {
+    background-color: #849dba;
+    color: #070c0f;
+}
+
+.unit button:focus {
+    /* outline: solid 2px #004dc9; */
+    border-width: 1px;
+}
+
 .fill {
     flex: 1;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
 }
 
 .legend {
@@ -232,11 +297,8 @@ header .container {
 }
 
 .legend table {
-    width: 100%;
-}
-
-table thead th {
-    border-bottom: 1px solid rgb(25, 42, 62, 0.5);
+    width: 280px;
+    margin: auto;
 }
 
 tr {
@@ -249,20 +311,30 @@ tr th {
     vertical-align: middle;
 }
 
+.mars th,
+.earth th {
+    /* min-width: 80px; */
+    text-align: left;
+}
+
+table thead th {
+    border-bottom: 1px solid #849dba;
+}
+
 table thead th:nth-child(1) {
     border-bottom: none;
 }
 
 .mobile-nav {
     position: relative;
-    margin: 20px 12%;
+    margin: 20px;
 }
 
 .mobile-nav .container-back {
     position: absolute;
-    width: calc(100% - 30px);
+    width: calc(100% - 40px);
     top: 10px;
-    border: 1px solid #849dba;
+    border: 1px solid #192a3e;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -281,8 +353,8 @@ table thead th:nth-child(1) {
     height: 20px;
     width: 20px;
     margin-bottom: 10px;
-    background: #849dba;
-    border: 1px solid #192a3e;
+    background: #192a3e;
+    border: 0px solid #192a3e;
     border-radius: 90px;
     z-index: 1;
 }
@@ -322,9 +394,13 @@ input::placeholder {
     opacity: 0.3;
 }
 
+input:-webkit-autofill {
+    background-color: #070c0f;
+}
+
 button {
-    font-family: helvetica, sans-serif;
-    font-weight: 300;
+    font-family: futura-pt, sans-serif;
+    font-weight: 500;
     font-style: normal;
     font-size: 24px;
     line-height: 32px;
@@ -343,10 +419,11 @@ button:focus {
 /* Modificatons */
 
 button.mobnav-button-selected {
-    background: #ff6700;
+    background: #d0dce7;
+    opacity: 1;
     /* border-color: #aa3b00; */
 }
 
 span.mobnav-span-selected {
-    color: #ff6700;
+    color: #d0dce7;
 }

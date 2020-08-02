@@ -1,3 +1,69 @@
+// Conversions
+function degreesToBearing(deg) {
+    switch (true) {
+        case deg > 348.75 && deg <= 11.25:
+            dir = "N";
+            break;
+        case deg > 11.25 && deg <= 33.75:
+            dir = "NNE";
+            break;
+        case deg > 33.75 && deg <= 56.25:
+            dir = "NE";
+            break;
+        case deg > 56.25 && deg <= 78.75:
+            dir = "ENE";
+            break;
+        case deg > 78.75 && deg <= 101.25:
+            dir = "E";
+            break;
+        case deg > 101.25 && deg <= 123.75:
+            dir = "ESE";
+            break;
+        case deg > 123.75 && deg <= 146.25:
+            dir = "SE";
+            break;
+        case deg > 146.25 && deg <= 168.75:
+            dir = "SSE";
+            break;
+        case deg > 168.75 && deg <= 191.25:
+            dir = "S";
+            break;
+        case deg > 191.25 && deg <= 213.75:
+            dir = "SSW";
+            break;
+        case deg > 213.75 && deg <= 236.25:
+            dir = "SW";
+            break;
+        case deg > 236.25 && deg <= 258.75:
+            dir = "WSW";
+            break;
+        case deg > 258.75 && deg <= 281.25:
+            dir = "W";
+            break;
+        case deg > 281.25 && deg <= 303.75:
+            dir = "WNW";
+            break;
+        case deg > 303.75 && deg <= 326.25:
+            dir = "NW";
+            break;
+        case deg > 326.25 && deg <= 348.75:
+            dir = "NNW";
+            break;
+        default:
+            dir = null;
+            break;
+    }
+    return dir;
+}
+
+function celsiusToFahrenheit(celsius) {
+    return (celsius * 9) / 5 + 32;
+}
+
+function kphToMph(kph) {
+    return kph / 1.609344;
+}
+
 // STORE
 const STORE = {
     martianWeather: {
@@ -15,14 +81,92 @@ const STORE = {
         pressure: [],
         wind: [],
     },
+    getConversionFunction: function () {
+        // standard conversion function is return data as is, if a non-metric conversion is selected,
+        // a conversion function is defined. Always returns a rounded value.
+        let convert = function (value) {
+            return Math.round(value).toString();
+        };
+
+        if (measure == "at" && STATE.isFarenheight) {
+            convert = function (value) {
+                if (typeof (value != "undefined")) {
+                    return Math.round(celsiusToFahrenheit(value)).toString();
+                }
+            };
+        } else if (measure == "wind" && STATE.isMph) {
+            convert = function (value) {
+                if (typeof (value != "undefined")) {
+                    return Math.round(kphToMph(value)).toString();
+                }
+            };
+        }
+        return convert;
+    },
+    getDataByMeasure: function (measure, planet) {
+        // temp and wind data may need to be converted
+        if (measure == "at" || measure == "wind") {
+            const response = [];
+
+            const convert = this.getConversionFunction();
+
+            // if conversion needed new array returned with convertable values converted.
+            if (measure == "at") {
+                if (planet == "martianWeather") {
+                    for (let val of this.martianWeather.at) {
+                        response.push({
+                            sol: val.sol,
+                            utc: val.utc,
+                            avg: convert(val.avg),
+                            high: convert(val.high),
+                            low: convert(val.low),
+                        });
+                    }
+                } else {
+                    for (let val of this.earthWeather.at) {
+                        response.push({
+                            utc: val.utc,
+                            avg: convert(val.avg),
+                            high: convert(val.high),
+                            low: convert(val.low),
+                        });
+                    }
+                }
+            } else if (measure == "wind") {
+                if (planet == "martianWeather") {
+                    for (let val of this.martianWeather.wind) {
+                        response.push({
+                            utc: val.utc,
+                            avg: convert(val.avg),
+                            high: convert(val.high),
+                            low: convert(val.low),
+                            windDir: val.windDir,
+                        });
+                    }
+                } else {
+                    for (let val of this.earthWeather.wind) {
+                        response.push({
+                            utc: val.utc,
+                            avg: convert(val.avg),
+                            windDir: val.windDir,
+                        });
+                    }
+                }
+            }
+            return response;
+        }
+
+        // Otherwise return the data as is.
+        return this[planet][measure];
+    },
 
     getAverage: function (planet, measure) {
-        if (measure != "at" && measure != "pressure") {
-            return "-";
+        if (measure != "at" && measure != "pressure" && measure != "wind") {
+            return "no data";
         }
 
         if (planet != "martianWeather" && planet != "earthWeather") {
-            return "-";
+            return "no data";
         }
 
         let total = 0;
@@ -31,51 +175,65 @@ const STORE = {
             if (rot.avg) {
                 total += rot.avg;
                 count += 1;
-            } else {
-                return "-";
             }
         }
 
-        return Math.round(total / count).toString();
+        if (count < 1) {
+            return "no data";
+        }
+
+        const convert = this.getConversionFunction();
+        const avg = total / count;
+        return convert(avg);
     },
+
     getMax: function (planet, measure) {
-        if (measure != "at" && measure != "pressure") {
-            return "-";
+        if (measure != "at" && measure != "pressure" && measure != "wind") {
+            return "no data";
         }
 
         if (planet != "martianWeather" && planet != "earthWeather") {
-            return "-";
+            return "no data";
         }
 
         const all = [];
         for (const rot of this[planet][measure]) {
             if (rot.high) {
                 all.push(rot.high);
-            } else {
-                return "-";
             }
         }
-        return Math.round(Math.max(...all)).toString();
+
+        if (all.length < 1) {
+            return "no data";
+        }
+
+        const convert = this.getConversionFunction();
+        const avg = Math.max(...all);
+        return convert(avg);
     },
     getMin: function (planet, measure) {
-        if (measure != "at" && measure != "pressure") {
-            return "-";
+        if (measure != "at" && measure != "pressure" && measure != "wind") {
+            return "no data";
         }
 
         if (planet != "martianWeather" && planet != "earthWeather") {
-            return "-";
+            return "no data";
         }
 
         const all = [];
         for (const rot of this[planet][measure]) {
             if (rot.low) {
                 all.push(rot.low);
-            } else {
-                return "-";
             }
         }
 
-        return Math.round(Math.min(...all)).toString();
+        if (all.length < 1) {
+            return "no data";
+        }
+
+        const convert = this.getConversionFunction();
+        const avg = Math.min(...all);
+        return convert(avg);
     },
 };
 
@@ -195,7 +353,7 @@ function buildWindChartDataArr(planets) {
     return windCrtdataArr;
 }
 
-function buildLineChartDataArr(planets, metric) {
+function buildLineChartDataArr(planets, metric, measure) {
     const lnCrtdataArr = {
         labels: [],
         earth: [],
@@ -215,15 +373,15 @@ function buildLineChartDataArr(planets, metric) {
         i < STATE.getNumDays();
         i++
     ) {
-        console.log(STATE.getNumDays());
-
         lnCrtdataArr.labels.push(
             date.format("M-D").toString().concat(" vs. ", getSol(i))
             //get UTC from and compare to range...
         );
+
         for (let [planetName, planetData] of Object.entries(planets)) {
             lnCrtdataArr[planetName].push(planetData[i][metric]);
         }
+
         date.add(1, "days");
     }
 
@@ -239,8 +397,8 @@ function getChartData(measure) {
     }
 
     const dataSrc = {
-        mars: STORE.martianWeather[measure],
-        earth: STORE.earthWeather[measure],
+        mars: STORE.getDataByMeasure(measure, "martianWeather"),
+        earth: STORE.getDataByMeasure(measure, "earthWeather"),
     };
 
     //If # of days retrieved are not = to the num days query, do not render this data set.
@@ -260,7 +418,7 @@ function getChartData(measure) {
     if (measure == "wind") {
         dataArr = buildWindChartDataArr(dataSrc);
     } else {
-        dataArr = buildLineChartDataArr(dataSrc, metrics);
+        dataArr = buildLineChartDataArr(dataSrc, metrics, measure);
     }
 
     data.labels = dataArr.labels;
@@ -323,63 +481,6 @@ function pushMartianData(data) {
             console.log(error);
         }
     }
-}
-
-function degreesToBearing(deg) {
-    switch (true) {
-        case deg > 348.75 && deg <= 11.25:
-            dir = "N";
-            break;
-        case deg > 11.25 && deg <= 33.75:
-            dir = "NNE";
-            break;
-        case deg > 33.75 && deg <= 56.25:
-            dir = "NE";
-            break;
-        case deg > 56.25 && deg <= 78.75:
-            dir = "ENE";
-            break;
-        case deg > 78.75 && deg <= 101.25:
-            dir = "E";
-            break;
-        case deg > 101.25 && deg <= 123.75:
-            dir = "ESE";
-            break;
-        case deg > 123.75 && deg <= 146.25:
-            dir = "SE";
-            break;
-        case deg > 146.25 && deg <= 168.75:
-            dir = "SSE";
-            break;
-        case deg > 168.75 && deg <= 191.25:
-            dir = "S";
-            break;
-        case deg > 191.25 && deg <= 213.75:
-            dir = "SSW";
-            break;
-        case deg > 213.75 && deg <= 236.25:
-            dir = "SW";
-            break;
-        case deg > 236.25 && deg <= 258.75:
-            dir = "WSW";
-            break;
-        case deg > 258.75 && deg <= 281.25:
-            dir = "W";
-            break;
-        case deg > 281.25 && deg <= 303.75:
-            dir = "WNW";
-            break;
-        case deg > 303.75 && deg <= 326.25:
-            dir = "NW";
-            break;
-        case deg > 326.25 && deg <= 348.75:
-            dir = "NNW";
-            break;
-        default:
-            dir = null;
-            break;
-    }
-    return dir;
 }
 
 function pushTerranData(data) {
@@ -553,6 +654,19 @@ function renderChart(measure) {
     const ctx = STATE.chartCtx;
 
     const options = {
+        // maintainAspectRatio: false,
+
+        // scales: {
+        //     yAxes: [
+        //         {
+        //             scaleLabel: {
+        //                 display: true,
+        //                 labelString: "temp",
+        //             },
+        //         },
+        //     ],
+        // },
+
         legend: {
             display: measure == "wind" ? false : true,
             position: "bottom",
@@ -562,31 +676,46 @@ function renderChart(measure) {
             //chart.data.datasets.length
             return `<table>
                         <thead>
-                            <th></td>
-                            <th>min</td>
-                            <th>avg</td>
-                            <th>max</td>
+                            <tr>
+                                <th></th>
+                                <th>min</th>
+                                <th>avg</th>
+                                <th>max</th>
+                            </tr>
                         </thead>
-                        <tr class="mars">
-                            <th class="js-legend-item"${console.log(
-                                chart
-                            )}>mars</td>
-                            <td>${STORE.getMin("martianWeather", measure)}</td>
-                            <td>${STORE.getAverage(
-                                "martianWeather",
-                                measure
-                            )}</td>
-                            <td>${STORE.getMax("martianWeather", measure)}</td>
-                        </tr>
-                        <tr class = "earth">
-                            <th class="js-legend-item">earth</td>
-                            <td>${STORE.getMin("earthWeather", measure)}</td>
-                            <td>${STORE.getAverage(
-                                "earthWeather",
-                                measure
-                            )}</td>
-                            <td>${STORE.getMax("earthWeather", measure)}</td>
-                        </tr>
+                        
+                        <tbody>
+                            <tr class="mars">
+                                <th class="js-legend-item">mars</th>
+                                <td>${STORE.getMin(
+                                    "martianWeather",
+                                    measure
+                                )}</td>
+                                <td>${STORE.getAverage(
+                                    "martianWeather",
+                                    measure
+                                )}</td>
+                                <td>${STORE.getMax(
+                                    "martianWeather",
+                                    measure
+                                )}</td>
+                            </tr>
+                            <tr class = "earth">
+                                <th class="js-legend-item">earth</th>
+                                <td>${STORE.getMin(
+                                    "earthWeather",
+                                    measure
+                                )}</td>
+                                <td>${STORE.getAverage(
+                                    "earthWeather",
+                                    measure
+                                )}</td>
+                                <td>${STORE.getMax(
+                                    "earthWeather",
+                                    measure
+                                )}</td>
+                            </tr>
+                        <tbody>
                     </table>`;
         },
     };
@@ -607,34 +736,41 @@ function renderData() {
         if (measure == "at") {
             return `
             <div class="container unit">
-                <button class="left">°C</button>
-                <button class="right">°F</button>
+                <button class="left ${
+                    STATE.isFarenheight ? "" : "toggle-on"
+                }" data-measure="at">°C</button>
+                <button class="right ${
+                    STATE.isFarenheight ? "toggle-on" : ""
+                }" data-measure="at">°F</button>
             </div>`;
         }
+
         if (measure == "pressure") {
             return `
             <div class="container unit">
-                <button>hPh</button>
+                <button class="toggle-on" data-measure="at">hPh</button>
             </div>`;
         }
+
         if (measure == "wind") {
             return `
             <div class="container unit">
-                <button class="left">kPh</button>
-                <button class="right">mPh</button>
+                <button class="left ${
+                    STATE.isMph ? "" : "toggle-on"
+                }" data-measure="wind">kPh</button>
+                <button class="right ${
+                    STATE.isMph ? "toggle-on" : ""
+                }" data-measure="wind">mPh</button>
             </div>`;
         }
     }
 
     return `
         <div class='container graph'>
-            <span>
-            ${STATE.getDateStart("M/D/YY")}
-            -
-            ${STATE.getDateEnd("M/D/YY")}
-            </span>
             ${getUnitContainer()}
-            <canvas id="myChart"></canvas>
+            <div class="chart-container fill">
+                <canvas id="myChart"></canvas>
+            </div>
             <!-- width="400" height="400" -->
             <div class="legend" id="legend"></div>
         </div>`;
@@ -662,7 +798,7 @@ function renderWindRose(ctx, data) {
 
 function renderSplash() {
     $("#js-content-wrapper").html(`
-        <header class="bg-dark">
+        <header class="bg-dark splash">
             <div class="container">
                 <h1>Martian Weather Service</h1>
             </div>
@@ -671,7 +807,7 @@ function renderSplash() {
         <main class="container fill">
             <div class="graphic-back fill">
                 <div class="gradient-back"></div>
-                <div class="wrapper">
+                <div class="wrapper centered-content">
                     <form id="js-comp-earth-to-mars" class="container splash-content action="sumbit">
                         <div class="container vbox">
                             <p class="splash-summary">
@@ -718,60 +854,76 @@ function render() {
                     }</h2>
                 </div>
             </header>
-            <main>
-                <div class ="wrapper">
-                    <div class="container date-selector">
-                        <h3>Select Date Range:</h3>
-                        <form
-                            id="js-date-picker"
-                            class="container ctr-justified"
-                            action="submit"
-                        >
-                            <div class="container date-range-picker">
-                                <div class="container date-picker">
-                                    <input
-                                        type="date"
-                                        name="start-date"
-                                        id="js-start-date"
-                                        class="js-date-selector"
-                                        value="${STATE.getDateStart(
-                                            "YYYY-MM-DD"
-                                        )}"
-                                        max="${moment().format("YYYY-MM-DD")}"
-                                        min="${moment()
-                                            .subtract(6, "days")
-                                            .format("YYYY-MM-DD")}"
-                                    />
-                                    <span 
-                                        class="sol" 
-                                        id="js-sol-start"
-                                    >Sol ${STATE.getSolStart()}
-                                    </span>
-                                </div>
-                                <div class="container date-picker">
-                                    <input
-                                        type="date"
-                                        name="end-date"
-                                        id="js-end-date"
-                                        class="js-date-selector"
-                                        value="${STATE.getDateEnd(
-                                            "YYYY-MM-DD"
-                                        )}"
-                                        max="${moment().format("YYYY-MM-DD")}"
-                                        min="${moment()
-                                            .subtract(6, "days")
-                                            .format("YYYY-MM-DD")}"
-                                    />
-                                    <span 
-                                        class="sol"
-                                        id="js-sol-end"
-                                    >Sol ${STATE.getSolEnd()}
-                                    </span>
-                                </div>
+            <main class = "bg-secondary fill">
+                <div class="vbox full-height">
+                    <div class="horz-borders">
+                        <div class ="centered-content fill">
+                            <div class="container date-selector">
+                                <h3>Select Date Range:</h3>
+                                <form
+                                    id="js-date-picker"
+                                    class="container ctr-justified"
+                                    action="submit"
+                                >
+                                    <div class="container date-range-picker">
+                                        <div class="container date-picker">
+                                            <input
+                                                type="date"
+                                                name="start-date"
+                                                id="js-start-date"
+                                                class="js-date-selector"
+                                                value="${STATE.getDateStart(
+                                                    "YYYY-MM-DD"
+                                                )}"
+                                                max="${moment().format(
+                                                    "YYYY-MM-DD"
+                                                )}"
+                                                min="${moment()
+                                                    .subtract(6, "days")
+                                                    .format("YYYY-MM-DD")}"
+                                                required pattern="\d{4}-\d{2}-\d{2}"
+                                            />
+                                            <span 
+                                                class="sol" 
+                                                id="js-sol-start"
+                                            >Sol ${STATE.getSolStart()}
+                                            </span>
+                                        </div>
+                                        <div class="container date-picker">
+                                            <input
+                                                type="date"
+                                                name="end-date"
+                                                id="js-end-date"
+                                                class="js-date-selector"
+                                                value="${STATE.getDateEnd(
+                                                    "YYYY-MM-DD"
+                                                )}"
+                                                max="${moment().format(
+                                                    "YYYY-MM-DD"
+                                                )}"
+                                                min="${moment()
+                                                    .subtract(6, "days")
+                                                    .format("YYYY-MM-DD")}"
+                                                required pattern="\d{4}-\d{2}-\d{2}"
+                                            />
+                                            <span 
+                                                class="sol"
+                                                id="js-sol-end"
+                                            >Sol ${STATE.getSolEnd()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                    ${renderData()}
+                    <div class = "centered-content ">
+                        ${renderData()}              
+                    </div>
+                </div>
+            </main>
+            <footer>
+                <div class="wrapper centered-content">
                     <div class="mobile-nav">
                         <div class="container-back"></div>
                         <div class="container">
@@ -820,7 +972,7 @@ function render() {
                         </div>
                     </div>
                 </div>
-            </main>`
+            </footer>`
         );
 
         STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
@@ -875,6 +1027,18 @@ $(render());
         legendClickCallback(e);
         alert("hello");
     });
+
+    // watch unit-selector
+    $("#js-content-wrapper").on("click", ".unit button", function (e) {
+        // e.preventDefault();
+        const measure = $(this).attr("data-measure");
+        if (measure == "at") {
+            STATE.isFarenheight = !STATE.isFarenheight;
+        } else if (measure == "wind") {
+            STATE.isMph = !STATE.isMph;
+        }
+        render();
+    });
 })();
 
 function legendClickCallback(event) {
@@ -900,5 +1064,3 @@ function legendClickCallback(event) {
         target.classList.add("hidden");
     }
 }
-
-(function watchlegendItems() {})();
