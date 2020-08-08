@@ -74,8 +74,14 @@ const STORE = {
     earthWeather: {
         location: {
             address: "",
-            lat: "0",
-            lon: "0",
+            lat: null,
+            lon: null,
+            isLocSet: function () {
+                if (this.address && this.lat && this.lon) {
+                    return true;
+                }
+                return false;
+            },
         },
         at: [],
         pressure: [],
@@ -240,6 +246,7 @@ const STORE = {
 const STATE = {
     isFarenheight: false,
     isMph: false,
+    apiError: [],
     activemeasure: null, //"temp", "pres", "wind"
     // isSplashActive: false,
     dateStart: null,
@@ -455,7 +462,7 @@ function pushMartianData(data) {
                 low: data[keys[i]].AT.mn,
             });
         } catch (error) {
-            console.log(error);
+            STATE.apiError.push(error);
         }
 
         try {
@@ -467,7 +474,7 @@ function pushMartianData(data) {
                 low: data[keys[i]].PRE.mn,
             });
         } catch (error) {
-            console.log(error);
+            STATE.apiError.push(error);
         }
         try {
             STORE.martianWeather.wind.push({
@@ -478,7 +485,7 @@ function pushMartianData(data) {
                 windDir: data[keys[i]].WD.most_common.compass_point,
             });
         } catch (error) {
-            console.log(error);
+            STATE.apiError.push(error);
         }
     }
 }
@@ -521,12 +528,32 @@ function geolocate(location) {
 
     return fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`)
         .then((response) => {
-            if (response.ok) {
-                return response.json();
+            if (!response.ok) {
+                throw new Error(response.statusText);
             }
-            throw new Error(response.statusText);
+
+            return response.json();
         })
-        .catch((err) => console.log(err));
+        .then((responseJson) => {
+            if (responseJson.status == "ZERO_RESULTS") {
+                throw new Error("No Result");
+            }
+
+            STORE.earthWeather.location.lat =
+                responseJson.results[0].geometry.location.lat;
+            STORE.earthWeather.location.lon =
+                responseJson.results[0].geometry.location.lng;
+            STORE.earthWeather.location.address =
+                responseJson.results[0].formatted_address;
+
+            return true;
+        })
+        .catch((err) => {
+            STORE.earthWeather.location.lat = null;
+            STORE.earthWeather.location.lon = null;
+            STORE.earthWeather.location.address = "";
+            return false;
+        });
 }
 
 function fetchMartianData() {
@@ -558,7 +585,7 @@ function fetchMartianData() {
             return response;
         })
         .catch((err) => {
-            console.log(err);
+            STATE.apiError.push(err);
             return false;
         });
 }
@@ -597,7 +624,7 @@ function fetchTerranData() {
             );
         })
         .catch((err) => {
-            console.log(err);
+            STATE.apiError.push(err);
             return false;
         });
 }
@@ -610,41 +637,18 @@ function refreshDataArr() {
     }
 }
 
-function dataFetch() {
-    const location = STORE.earthWeather.location.address;
-
-    const terranRequest = geolocate(location).then((responseJson) => {
-        STORE.earthWeather.location.lat =
-            responseJson.results[0].geometry.location.lat;
-        STORE.earthWeather.location.lon =
-            responseJson.results[0].geometry.location.lng;
-        STORE.earthWeather.location.address =
-            responseJson.results[0].formatted_address;
-        return fetchTerranData(location);
-    });
-
-    const martianRequest = fetchMartianData();
-
-    return [martianRequest, terranRequest];
-}
-
 function updateData() {
     refreshDataArr();
 
-    response = dataFetch();
+    const response = [fetchMartianData(), fetchTerranData()];
 
     return Promise.all(response).then(function (values) {
         if (values[0]) {
             pushMartianData(values[0]);
-        } else {
-            //Report Error to User
         }
         if (values[1]) {
             pushTerranData(values[1].data);
-        } else {
-            //Report Error to User
         }
-        return 0;
     });
 }
 
@@ -796,6 +800,27 @@ function renderWindRose(ctx, data) {
     });
 }
 
+function renderGeoRes(submit = false) {
+    //prettier-ignore
+    console.log(submit)
+    const html = $("#js-geo-result-cont").html(`
+        ${
+            submit
+                ? `<img id="js-geo-result-icon" class="geo-error" src="assets/error.png">`
+                : ""
+        }
+        <span id="js-geo-result" class="geo-result ${
+            submit ? "geo-error" : ""
+        }">${submit ? "Address not found" : ""}</span>
+    `);
+
+    if (STORE.earthWeather.location.isLocSet() && !submit) {
+        $(html)
+            .find("#js-geo-result")
+            .html("Comparing " + STORE.earthWeather.location.address);
+    }
+}
+
 function renderSplash() {
     $("#js-content-wrapper").html(`
         <header class="bg-dark splash">
@@ -815,18 +840,49 @@ function renderSplash() {
                                 Planitia, Mars.
                             </p>
                             <input type="text" name="location" id="js-location-selector" placeholder="Type a location..." required>
+                            <div id="js-geo-result-cont" class="container">
+                                <span id="js-geo-result" class="geo-result"></span>
+                            </div>
                         </div>
                         <button type="submit">Compare to Mars</button>
                     </form>
                 </div>
             </div>
-        </main>    
+        </main>
     `);
 
     // <select name="location" id="location-selector" required>
     //     <option value="nyc">New York City</option>
     //     <option value="la">Los Angeles</option>
     // </select>
+}
+
+function renderError() {
+    const error = STATE.apiError;
+    const errorInDom = $("#js-content-wrapper").find(".api-error");
+
+    if (errorInDom) {
+        $(errorInDom).remove();
+    }
+
+    if (STATE.apiError.length > 0) {
+        STATE.apiError = [];
+        let errorText = [];
+        for (const e of error) {
+            errorText.push(`<span>${e}</span>`);
+        }
+
+        errorTextHtml = errorText.join("");
+        $("#js-content-wrapper").append(`
+        <div class="bg-error api-error">
+            <div class="bg-dark api-error-container">
+                <img src="assets/attenae.svg" alt="antenna">
+                ${errorTextHtml}
+                <button id="js-clear-error">Ok</button>
+            </div>
+        </div>`);
+    } else {
+    }
 }
 
 function render() {
@@ -917,7 +973,7 @@ function render() {
                             </div>
                         </div>
                     </div>
-                    <div class = "centered-content ">
+                    <div class = "main-content">
                         ${renderData()}              
                     </div>
                 </div>
@@ -975,6 +1031,10 @@ function render() {
             </footer>`
         );
 
+        if (STATE.apiError.length > 0) {
+            renderError();
+        }
+
         STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
         STATE.chartLegend = $(html).find("#legend");
 
@@ -994,11 +1054,15 @@ $(render());
         e
     ) {
         e.preventDefault();
-        STORE.earthWeather.location.address = $("#js-location-selector").val();
-        updateData().then(() => {
-            STATE.activemeasure = "at";
-            render();
-        });
+
+        if (!STORE.earthWeather.location.isLocSet()) {
+            renderGeoRes(true);
+        } else {
+            updateData().then(() => {
+                STATE.activemeasure = "at";
+                render();
+            });
+        }
     });
 
     // return;
@@ -1038,6 +1102,18 @@ $(render());
             STATE.isMph = !STATE.isMph;
         }
         render();
+    });
+
+    // watch location
+    $("#js-content-wrapper").on("keyup", "#js-location-selector", function () {
+        const geoRes = geolocate($(this).val());
+        renderGeoRes();
+    });
+
+    // watch ok error
+    $("#js-content-wrapper").on("click", "#js-clear-error", function (e) {
+        e.preventDefault();
+        renderError();
     });
 })();
 

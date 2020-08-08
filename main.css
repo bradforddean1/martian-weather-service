@@ -1,8 +1,3 @@
-.js-legend-item {
-    cursor: pointer;
-}
-
-/* text Styles */
 @import url("https://fonts.googleapis.com/css2?family=Abel&display=swap");
 @import url("https://use.typekit.net/lrv4rll.css");
 
@@ -69,6 +64,69 @@ input {
     color: #849dba;
     opacity: 0.8;
     margin-bottom: 10px;
+}
+
+.geo-result {
+    text-align: left;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 14px;
+    margin-top: 5px;
+}
+
+.geo-error {
+    color: #eb5757;
+}
+
+.api-error {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.api-error-container {
+    width: 260px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    padding: 40px;
+    border: 2px solid #eb5757;
+}
+
+.api-error-container > * {
+    margin: 12.5px;
+}
+
+.api-error-container > button,
+.api-error-container > span {
+    width: 125px;
+}
+
+.api-error-container > button {
+    box-sizing: border-box;
+    height: 60px;
+    text-transform: uppercase;
+}
+
+.api-error-container > span {
+    font-family: Abel;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 18px;
+    text-transform: uppercase;
+}
+
+img.geo-error {
+    display: inline;
+    padding-top: 0.25em;
+    padding-right: 0.4em;
 }
 
 tr {
@@ -146,6 +204,11 @@ tr.mars {
     background-color: #070c0f;
 }
 
+.bg-error {
+    background-color: rgba(7, 12, 15, 0.8);
+    z-index: 5;
+}
+
 .bg-light {
     background-color: #e5e5e5;
 }
@@ -153,23 +216,28 @@ tr.mars {
 /* Layout */
 
 .viewport {
+    position: relative;
     height: 100vh;
     width: 100vw;
     margin: 0;
 }
 
 .wrapper {
-    min-width: 320px;
     /* flex: 1; */
     margin: auto;
     height: 100%;
 }
 
 .centered-content {
-    width: 560px;
     max-width: 560px;
-    min-width: 320px;
     margin: 0 auto;
+}
+
+.main-content {
+    flex: 1;
+    align-self: center;
+    width: 100%;
+    max-width: 560px;
 }
 
 .container {
@@ -244,7 +312,7 @@ header.splash .container {
 .graph {
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 40px;
 }
 
 .unit {
