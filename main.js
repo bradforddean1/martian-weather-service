@@ -681,7 +681,7 @@ function renderChart(measure) {
             return `<table>
                         <thead>
                             <tr>
-                                <th></th>
+                                <td></td>
                                 <th>min</th>
                                 <th>avg</th>
                                 <th>max</th>
@@ -839,7 +839,7 @@ function renderSplash() {
                                 Compare your local weather to the weather at Elysium
                                 Planitia, Mars.
                             </p>
-                            <input type="text" name="location" id="js-location-selector" placeholder="Type a location..." required>
+                            <input type="text" name="location" title="location" id="js-location-selector" placeholder="Type a location..." required>
                             <div id="js-geo-result-cont" class="container">
                                 <span id="js-geo-result" class="geo-result"></span>
                             </div>
@@ -886,21 +886,7 @@ function renderError() {
 }
 
 function render() {
-    measure = STATE.activemeasure;
-
-    function isMobNavButSelect(option, element) {
-        if (option == STATE.activemeasure) {
-            if (element == "button") {
-                return "mobnav-button-selected";
-            }
-            if (element == "span") {
-                return "mobnav-span-selected";
-            }
-        }
-        return "";
-    }
-
-    if (measure) {
+    if (STATE.activemeasure) {
         //prettier-ignore
         const html = $("#js-content-wrapper").html(
             `
@@ -910,7 +896,9 @@ function render() {
                             <span class="caption">comparing to:</span>
                             ${STORE.earthWeather.location.address}
                         </h2>
-                        <a id="js-go-back" class="goBack" href="#"></a>
+                        <a id="js-go-back" class="goBack" href="#">
+                            <img src="assets/arrow_back.svg" alt="Go Back">
+                        </a>
                     </div>
             </header>
             <main class = "bg-secondary fill">
@@ -929,6 +917,7 @@ function render() {
                                             <input
                                                 type="date"
                                                 name="start-date"
+                                                title="start date"
                                                 id="js-start-date"
                                                 class="js-date-selector"
                                                 value="${STATE.getDateStart(
@@ -952,6 +941,7 @@ function render() {
                                             <input
                                                 type="date"
                                                 name="end-date"
+                                                title="end date"
                                                 id="js-end-date"
                                                 class="js-date-selector"
                                                 value="${STATE.getDateEnd(
@@ -986,48 +976,18 @@ function render() {
                     <div class="mobile-nav">
                         <div class="container-back"></div>
                         <div class="container">
-                            <div class="bbox" >
-                                <button
-                                    type="button"
-                                    class="js-measure-selector ${isMobNavButSelect(
-                                        "at",
-                                        "button"
-                                    )}"
-                                    data-measure="at"
-                                ></button>
-                                <span class="${isMobNavButSelect(
-                                    "at",
-                                    "span"
-                                )}">°C/°F</span>
-                            </div>
-                            <div class="bbox">
-                                <button
-                                    type="button"
-                                    class="js-measure-selector ${isMobNavButSelect(
-                                        "pressure",
-                                        "button"
-                                    )}"
-                                    data-measure="pressure"
-                                ></button>
-                                <span class="${isMobNavButSelect(
-                                    "pressure",
-                                    "span"
-                                )}">hPa</span>
-                            </div>
-                            <div class="bbox">
-                                <button
-                                    type="button"
-                                    class="js-measure-selector ${isMobNavButSelect(
-                                        "wind",
-                                        "button"
-                                    )}"
-                                    data-measure="wind"
-                                ></button>
-                                <span class="${isMobNavButSelect(
-                                    "wind",
-                                    "span"
-                                )}">Wind</span>
-                            </div>    
+                            <a class="bbox js-measure-selector" data-measure="at">
+                                <div class="circle ${STATE.activemeasure == "at" && "mobnav-button-selected"}"></div>
+                                <span class="${STATE.activemeasure == "at" && "mobnav-button-selected"}">°C/°F</span>
+                            </a>
+                            <a class="bbox js-measure-selector" data-measure="pressure">
+                                <div class="circle ${STATE.activemeasure == "pressure" && "mobnav-button-selected"}"></div>
+                                <span class="${STATE.activemeasure == "pressure" && "mobnav-button-selected"}">hPa</span>
+                            </a>
+                            <a class="bbox js-measure-selector" data-measure="wind">
+                                <div class="circle ${STATE.activemeasure == "wind" && "mobnav-button-selected"}"></div>
+                                <span class="${STATE.activemeasure == "wind" && "mobnav-button-selected"}">Wind</span>
+                            </a>    
                         </div>
                     </div>
                 </div>

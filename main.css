@@ -151,11 +151,11 @@ tr td {
 }
 
 tr.earth {
-    color: #004dc9;
+    color: #2c7bfa;
 }
 
 tr.mars {
-    color: #aa3b00;
+    color: #ff6700;
 }
 
 /* Backgrounds */
@@ -418,7 +418,7 @@ table thead th:nth-child(1) {
     align-items: center;
 }
 
-.mobile-nav button {
+.mobile-nav .circle {
     height: 20px;
     width: 20px;
     margin-bottom: 10px;
@@ -439,12 +439,14 @@ hr {
 }
 
 .goBack {
-    background-image: url(assets/arrow_back.svg);
-    height: 24px;
-    width: 24px;
     position: absolute;
     bottom: 20px;
     left: 35px;
+}
+
+.goBack img {
+    height: 24px;
+    width: 24px;
 }
 
 /* Item Positioning */
@@ -495,12 +497,12 @@ button:focus {
 
 /* Modificatons */
 
-button.mobnav-button-selected {
+.circle.mobnav-button-selected {
     background: #d0dce7;
     opacity: 1;
     /* border-color: #aa3b00; */
 }
 
-span.mobnav-span-selected {
+span.mobnav-button-selected {
     color: #d0dce7;
 }
