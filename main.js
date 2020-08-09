@@ -901,20 +901,23 @@ function render() {
     }
 
     if (measure) {
+        //prettier-ignore
         const html = $("#js-content-wrapper").html(
             `
             <header class="bg-dark">
-                <div class="container">
-                    <h2><span class="caption">comparing to:</span>${
-                        STORE.earthWeather.location.address
-                    }</h2>
-                </div>
+                    <div class="container" style="">
+                        <h2>
+                            <span class="caption">comparing to:</span>
+                            ${STORE.earthWeather.location.address}
+                        </h2>
+                        <a id="js-go-back" class="goBack" href="#"></a>
+                    </div>
             </header>
             <main class = "bg-secondary fill">
                 <div class="vbox full-height">
                     <div class="horz-borders">
                         <div class ="centered-content fill">
-                            <div class="container date-selector">
+                            <div class="container date-selector ">
                                 <h3>Select Date Range:</h3>
                                 <form
                                     id="js-date-picker"
@@ -1114,6 +1117,12 @@ $(render());
     $("#js-content-wrapper").on("click", "#js-clear-error", function (e) {
         e.preventDefault();
         renderError();
+    });
+
+    //watch go back
+    $("#js-content-wrapper").on("click", "#js-go-back", function (e) {
+        e.preventDefault();
+        renderSplash();
     });
 })();
 
