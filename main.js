@@ -87,7 +87,7 @@ const STORE = {
         pressure: [],
         wind: [],
     },
-    getConversionFunction: function () {
+    getConversionFunction: function (measure) {
         // standard conversion function is return data as is, if a non-metric conversion is selected,
         // a conversion function is defined. Always returns a rounded value.
         let convert = function (value) {
@@ -114,7 +114,7 @@ const STORE = {
         if (measure == "at" || measure == "wind") {
             const response = [];
 
-            const convert = this.getConversionFunction();
+            const convert = this.getConversionFunction(measure);
 
             // if conversion needed new array returned with convertable values converted.
             if (measure == "at") {
@@ -248,7 +248,6 @@ const STATE = {
     isMph: false,
     apiError: [],
     activemeasure: null, //"temp", "pres", "wind"
-    // isSplashActive: false,
     dateStart: null,
     dateEnd: null,
     solStart: null,
@@ -347,10 +346,6 @@ function buildWindChartDataArr(planets) {
                 windObjs[planetName][planetData[i].windDir] = planetData[i].avg;
             }
         }
-
-        // if (earth[planets.earth[i].windDir] < planets.earth[i].avg) {
-        //     earth[planets.earth[i].windDir] = planets.earth[i].avg;
-        // }
     }
 
     windCrtdataArr.mars = Object.values(windObjs.mars);
@@ -382,7 +377,6 @@ function buildLineChartDataArr(planets, metric, measure) {
     ) {
         lnCrtdataArr.labels.push(
             date.format("M-D").toString().concat(" vs. ", getSol(i))
-            //get UTC from and compare to range...
         );
 
         for (let [planetName, planetData] of Object.entries(planets)) {
@@ -415,7 +409,7 @@ function getChartData(measure) {
             for (let i = 0; i < len; i++) {
                 dataSrc[planet].push({ Error: "Missing Days" });
             }
-            /* TODO: add unreliable data error here */
+            /* TODO: add unreliable data error */
         }
     });
 
@@ -575,15 +569,6 @@ function fetchMartianData() {
                 "Failed to retrieve Martian data from the NASA Insight program"
             );
         })
-        .then((response) => {
-            // for (let [key, value] of Object.keys(response)) {
-            //     if (moment.utc(value.Last_UTC).isAfter(end)) {
-            //         // filteredResponse.push(response[key]);
-            //     }
-            // }
-
-            return response;
-        })
         .catch((err) => {
             STATE.apiError.push(err);
             return false;
@@ -593,7 +578,6 @@ function fetchMartianData() {
 function fetchTerranData() {
     const headers = new Headers();
     headers.append("x-api-key", "BXfdILEuBoXF0cB2NIrZVc5ileNAC4lW");
-    // headers.append("Access-Control-Allow-Origin", "*");
 
     const requestOptions = {
         method: "GET",
@@ -658,26 +642,12 @@ function renderChart(measure) {
     const ctx = STATE.chartCtx;
 
     const options = {
-        // maintainAspectRatio: false,
-
-        // scales: {
-        //     yAxes: [
-        //         {
-        //             scaleLabel: {
-        //                 display: true,
-        //                 labelString: "temp",
-        //             },
-        //         },
-        //     ],
-        // },
-
         legend: {
             display: measure == "wind" ? false : true,
             position: "bottom",
         },
 
         legendCallback: function (chart) {
-            //chart.data.datasets.length
             return `<table>
                         <thead>
                             <tr>
@@ -802,7 +772,6 @@ function renderWindRose(ctx, data) {
 
 function renderGeoRes(submit = false) {
     //prettier-ignore
-    console.log(submit)
     const html = $("#js-geo-result-cont").html(`
         ${
             submit
@@ -850,11 +819,6 @@ function renderSplash() {
             </div>
         </main>
     `);
-
-    // <select name="location" id="location-selector" required>
-    //     <option value="nyc">New York City</option>
-    //     <option value="la">Los Angeles</option>
-    // </select>
 }
 
 function renderError() {
@@ -886,7 +850,9 @@ function renderError() {
 }
 
 function render() {
-    if (STATE.activemeasure) {
+    const measure = STATE.activemeasure;
+
+    if (measure) {
         //prettier-ignore
         const html = $("#js-content-wrapper").html(
             `
@@ -1001,7 +967,7 @@ function render() {
         STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
         STATE.chartLegend = $(html).find("#legend");
 
-        renderChart(measure); //Desktop will need to render multiple charts.
+        renderChart(measure);
     } else {
         renderSplash();
     }
@@ -1032,14 +998,14 @@ $(render());
 
     //watch measure
     $("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
-        // e.preventDefault();
+        e.preventDefault();
         const measure = $(this).attr("data-measure");
         STATE.activemeasure = measure;
         render();
     });
 
     // watch daterange
-    $("#js-content-wrapper").on("change", ".js-date-selector", function (e) {
+    $("#js-content-wrapper").on("change", ".js-date-selector", function () {
         STATE.setDateStart($("#js-start-date").val());
         STATE.setDateEnd($("#js-end-date").val());
 
@@ -1050,14 +1016,12 @@ $(render());
 
     //watch legend call back items
     $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
-        // e.preventDefault();
         legendClickCallback(e);
-        alert("hello");
     });
 
     // watch unit-selector
     $("#js-content-wrapper").on("click", ".unit button", function (e) {
-        // e.preventDefault();
+        e.preventDefault();
         const measure = $(this).attr("data-measure");
         if (measure == "at") {
             STATE.isFarenheight = !STATE.isFarenheight;
