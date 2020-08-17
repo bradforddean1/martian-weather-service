@@ -220,6 +220,8 @@ tr.mars {
     height: 100vh;
     width: 100vw;
     margin: 0;
+    min-width: 320px;
+    overflow: scroll;
 }
 
 .wrapper {
@@ -358,6 +360,7 @@ header.splash .container {
 .chart-container {
     position: relative;
     width: 100%;
+    min-height: 300px;
 }
 
 .legend {

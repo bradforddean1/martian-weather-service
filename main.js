@@ -446,7 +446,9 @@ function getChartData(measure) {
 }
 
 function pushMartianData(data) {
+    const dataErrors = [];
     for (i = 0, keys = Object.keys(data); i < keys.length - 2; i++) {
+        let errOnDate = false;
         try {
             STORE.martianWeather.at.push({
                 sol: keys[i],
@@ -456,7 +458,18 @@ function pushMartianData(data) {
                 low: data[keys[i]].AT.mn,
             });
         } catch (error) {
-            STATE.apiError.push(error);
+            if (!errOnDate) {
+                dataErrors.push(keys[i]);
+                errOnDate = true;
+            }
+
+            STORE.martianWeather.pressure.push({
+                sol: null,
+                utc: null,
+                avg: null,
+                high: null,
+                low: null,
+            });
         }
 
         try {
@@ -468,7 +481,18 @@ function pushMartianData(data) {
                 low: data[keys[i]].PRE.mn,
             });
         } catch (error) {
-            STATE.apiError.push(error);
+            if (!errOnDate) {
+                dataErrors.push(keys[i]);
+                errOnDate = true;
+            }
+
+            STORE.martianWeather.pressure.push({
+                sol: null,
+                utc: null,
+                avg: null,
+                high: null,
+                low: null,
+            });
         }
         try {
             STORE.martianWeather.wind.push({
@@ -479,28 +503,96 @@ function pushMartianData(data) {
                 windDir: data[keys[i]].WD.most_common.compass_point,
             });
         } catch (error) {
-            STATE.apiError.push(error);
+            if (!errOnDate) {
+                dataErrors.push(keys[i]);
+                errOnDate = true;
+            }
+
+            STORE.martianWeather.wind.push({
+                utc: null,
+                avg: null,
+                high: null,
+                low: null,
+                windDir: null,
+            });
         }
+    }
+
+    if (dataErrors.length > 0) {
+        const errors = dataErrors.join(", ");
+        STATE.apiError.push(`Missing data for sol(s): ${errors}`);
     }
 }
 
 function pushTerranData(data) {
+    if (!data) {
+        STATE.apiError.push("No terran data found for location provided");
+        return;
+    }
+    const dataErrors = [];
     for (i = 0; i < data.length; i++) {
-        STORE.earthWeather.at.push({
-            utc: new Date(data[i].date),
-            avg: data[i].tavg,
-            high: data[i].tmax,
-            low: data[i].tmin,
-        });
-        STORE.earthWeather.pressure.push({
-            utc: new Date(data[i].date),
-            avg: data[i].pres,
-        });
-        STORE.earthWeather.wind.push({
-            utc: new Date(data[i].date),
-            avg: data[i].wspd,
-            windDir: degreesToBearing(data[i].wdir),
-        });
+        let errOnDate = false;
+        try {
+            STORE.earthWeather.at.push({
+                utc: new Date(data[i].date),
+                avg: data[i].tavg,
+                high: data[i].tmax,
+                low: data[i].tmin,
+            });
+        } catch (error) {
+            if (!errOnDate) {
+                dataErrors.push(data[i].date);
+                errOnDate = true;
+            }
+
+            STORE.earthWeather.at.push({
+                utc: null,
+                avg: null,
+                high: null,
+                low: null,
+            });
+        }
+
+        try {
+            STORE.earthWeather.pressure.push({
+                utc: new Date(data[i].date),
+                avg: data[i].pres,
+            });
+        } catch (error) {
+            if (!errOnDate) {
+                dataErrors.push(data[i].date);
+                errOnDate = true;
+            }
+
+            STORE.earthWeather.at.push({
+                utc: null,
+                avg: null,
+            });
+        }
+
+        try {
+            STORE.earthWeather.wind.push({
+                utc: new Date(data[i].date),
+                avg: data[i].wspd,
+                windDir: degreesToBearing(data[i].wdir),
+            });
+        } catch (error) {
+            if (!errOnDate) {
+                dataErrors.push(data[i].date);
+                errOnDate = true;
+            }
+
+            STORE.earthWeather.at.push({
+                utc: null,
+                avg: null,
+                windDir: null,
+            });
+        }
+    }
+
+    if (dataErrors.length > 0) {
+        const errors = dataErrors.join(", ");
+        STATE.apiError.push(`Missing for terran day(s): ${errors}`);
     }
 }
 
@@ -642,6 +734,7 @@ function renderChart(measure) {
     const ctx = STATE.chartCtx;
 
     const options = {
+        maintainAspectRatio: false,
         legend: {
             display: measure == "wind" ? false : true,
             position: "bottom",
@@ -987,9 +1080,11 @@ $(render());
         if (!STORE.earthWeather.location.isLocSet()) {
             renderGeoRes(true);
         } else {
-            updateData().then(() => {
-                STATE.activemeasure = "at";
-                render();
+            geolocate($("#js-location-selector").val()).then(() => {
+                updateData().then(() => {
+                    STATE.activemeasure = "at";
+                    render();
+                });
             });
         }
     });
@@ -1032,9 +1127,10 @@ $(render());
     });
 
     // watch location
-    $("#js-content-wrapper").on("keyup", "#js-location-selector", function () {
-        const geoRes = geolocate($(this).val());
-        renderGeoRes();
+    $("#js-content-wrapper").on("input", "#js-location-selector", function (e) {
+        geolocate($(this).val()).then(() => {
+            renderGeoRes();
+        });
     });
 
     // watch ok error
