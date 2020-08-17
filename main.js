@@ -988,7 +988,6 @@ function render() {
                                                 min="${moment()
                                                     .subtract(6, "days")
                                                     .format("YYYY-MM-DD")}"
-                                                required pattern="\d{4}-\d{2}-\d{2}"
                                             />
                                             <span 
                                                 class="sol" 
@@ -1012,7 +1011,6 @@ function render() {
                                                 min="${moment()
                                                     .subtract(6, "days")
                                                     .format("YYYY-MM-DD")}"
-                                                required pattern="\d{4}-\d{2}-\d{2}"
                                             />
                                             <span 
                                                 class="sol"
