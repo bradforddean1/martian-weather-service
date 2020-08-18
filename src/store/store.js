@@ -20,7 +20,7 @@ const  STORE = {
       pressure: [],
       wind: [],
   },
-  getConversionFunction: function () {
+  getConversionFunction: function (measure) {
       // standard conversion function is return data as is, if a non-metric conversion is selected,
       // a conversion function is defined. Always returns a rounded value.
       let convert = function (value) {
@@ -47,7 +47,7 @@ const  STORE = {
       if (measure == "at" || measure == "wind") {
           const response = [];
 
-          const convert = this.getConversionFunction();
+          const convert = this.getConversionFunction(measure);
 
           // if conversion needed new array returned with convertable values converted.
           if (measure == "at") {
@@ -121,7 +121,7 @@ const  STORE = {
           return "no data";
       }
 
-      const convert = this.getConversionFunction();
+      const convert = this.getConversionFunction(measure);
       const avg = total / count;
       return convert(avg);
   },
@@ -146,7 +146,7 @@ const  STORE = {
           return "no data";
       }
 
-      const convert = this.getConversionFunction();
+      const convert = this.getConversionFunction(measure);
       const avg = Math.max(...all);
       return convert(avg);
   },
@@ -170,7 +170,7 @@ const  STORE = {
           return "no data";
       }
 
-      const convert = this.getConversionFunction();
+      const convert = this.getConversionFunction(measure);
       const avg = Math.min(...all);
       return convert(avg);
   }
