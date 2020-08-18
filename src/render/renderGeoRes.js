@@ -1,3 +1,4 @@
+// TODO Find out why the app won't render without `submit = false`
 function renderGeoRes(submit = false) {
     //prettier-ignore
     console.log('renderGeoRes submit', submit)
