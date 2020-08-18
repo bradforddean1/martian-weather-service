@@ -1,5 +1,7 @@
 function render() {
-    if (STATE.activemeasure) {
+    const measure = STATE.activemeasure;
+
+    if (measure) {
         //prettier-ignore
         const html = $("#js-content-wrapper").html(
             `
@@ -42,7 +44,6 @@ function render() {
                                                 min="${moment()
                                                     .subtract(6, "days")
                                                     .format("YYYY-MM-DD")}"
-                                                required pattern="\d{4}-\d{2}-\d{2}"
                                             />
                                             <span
                                                 class="sol"
@@ -66,7 +67,6 @@ function render() {
                                                 min="${moment()
                                                     .subtract(6, "days")
                                                     .format("YYYY-MM-DD")}"
-                                                required pattern="\d{4}-\d{2}-\d{2}"
                                             />
                                             <span
                                                 class="sol"
@@ -114,7 +114,8 @@ function render() {
         STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
         STATE.chartLegend = $(html).find("#legend");
 
-        renderChart(measure="wind"); //Desktop will need to render multiple charts.
+        // TODO Find out why measure doesn't have a value
+        renderChart(measure="wind");
     } else {
         renderSplash();
     }
@@ -134,9 +135,11 @@ $(render());
         if (!STORE.earthWeather.location.isLocSet()) {
             renderGeoRes(true);
         } else {
-            updateData().then(() => {
-                STATE.activemeasure = "at";
-                render();
+            geolocate($("#js-location-selector").val()).then(() => {
+                updateData().then(() => {
+                    STATE.activemeasure = "at";
+                    render();
+                });
             });
         }
     });
@@ -145,14 +148,14 @@ $(render());
 
     //watch measure
     $("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
-        // e.preventDefault();
+        e.preventDefault();
         const measure = $(this).attr("data-measure");
         STATE.activemeasure = measure;
         render();
     });
 
     // watch daterange
-    $("#js-content-wrapper").on("change", ".js-date-selector", function (e) {
+    $("#js-content-wrapper").on("change", ".js-date-selector", function () {
         STATE.setDateStart($("#js-start-date").val());
         STATE.setDateEnd($("#js-end-date").val());
 
@@ -163,14 +166,12 @@ $(render());
 
     //watch legend call back items
     $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
-        // e.preventDefault();
         legendClickCallback(e);
-        alert("hello");
     });
 
     // watch unit-selector
     $("#js-content-wrapper").on("click", ".unit button", function (e) {
-        // e.preventDefault();
+        e.preventDefault();
         const measure = $(this).attr("data-measure");
         if (measure == "at") {
             STATE.isFarenheight = !STATE.isFarenheight;
@@ -181,9 +182,10 @@ $(render());
     });
 
     // watch location
-    $("#js-content-wrapper").on("keyup", "#js-location-selector", function () {
-        const geoRes = geolocate($(this).val());
-        renderGeoRes();
+    $("#js-content-wrapper").on("input", "#js-location-selector", function (e) {
+        geolocate($(this).val()).then(() => {
+            renderGeoRes();
+        });
     });
 
     // watch ok error
