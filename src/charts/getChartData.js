@@ -1,3 +1,11 @@
+/**
+ * Collects data from the STORE variable using getDataByMeasure method to generate the datasets.
+ * Formats and returns the data into the labels and datasets arrays required to generate a chart with the ChartJS api.
+ * @author Bradford Dean Wilson <bradford.dean.wilson@gmail.com>
+ * @param {string} measure – String indicating the type measure being charted, i.e. temperature(at), air pressure(pressure), or wind behavior(wind).
+ * @return {Object} Object containing two arrays: {labels, datasets}.
+ *
+ */
 function getChartData(measure) {
     const data = { labels: [], datasets: [] };
 

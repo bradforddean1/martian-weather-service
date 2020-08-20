@@ -1,3 +1,9 @@
+/**
+ * Fetches local (earth) weather data from the meteostat api: https://dev.meteostat.net/#:~:text=Meteostat%20is%20an%20open%20platform,request%20your%20personal%20API%20key
+ * @author Bradford Dean Wilson <bradford.dean.wilson@gmail.com>
+ * @return {Promise} Promise object with response data from the server
+ *
+ */
 function fetchTerranData() {
     const headers = new Headers();
     headers.append("x-api-key", "BXfdILEuBoXF0cB2NIrZVc5ileNAC4lW");

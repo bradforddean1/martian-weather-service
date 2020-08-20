@@ -1,3 +1,6 @@
+/**
+ * Renders the splash page.
+ */
 function renderSplash() {
     $("#js-content-wrapper").html(`
         <header class="bg-dark splash">

@@ -1,3 +1,7 @@
+/**
+ * Populates Terran weather data store with a passed in dataset.
+ * @param {object} data - Data to be populated in store
+ */
 function pushTerranData(data) {
     for (i = 0; i < data.length; i++) {
         STORE.earthWeather.at.push({

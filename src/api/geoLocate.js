@@ -1,9 +1,11 @@
 /**
- * Attempts to match the input to an actual location
+ * Attempts to match the input to an actual location using the google geocding api.
+ * With a successful match will set the standardized Postal Address, as well as Latitude and Longitude coordinates to the STORE variable.
  * @author Bradford Dean Wilson <bradford.dean.wilson@gmail.com>
  * @param {string} – The location submitted by the user
- * @return {Promise} Promise object with response data from the server
-*/
+ * @return {Promise} Promise object with boolean indicating success or fail.
+ *
+ */
 function geolocate(location) {
     let params = {
         address: encodeURI(location),

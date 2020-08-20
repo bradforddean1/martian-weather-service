@@ -1,8 +1,9 @@
 /**
- * Fetches Martian weather data
+ * Fetches Martian weather data from NASA insight API https://api.nasa.gov/assets/insight/InSight%20Weather%20API%20Documentation.pdf
  * @author Bradford Dean Wilson <bradford.dean.wilson@gmail.com>
  * @return {Promise} Promise object with response data from the server
-*/
+ *
+ */
 function fetchMartianData() {
     //prettier-ignore
     let params = {

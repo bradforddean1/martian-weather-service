@@ -1,5 +1,10 @@
+/**
+ * Runs listeners after render function.
+ */
 (function () {
-    //watch compare
+    /**
+     * Watch compare button
+     */
     $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (
         e
     ) {
@@ -15,9 +20,9 @@
         }
     });
 
-    // return;
-
-    //watch measure
+    /**
+     * Watch measure selctor buttons (mobile)
+     */
     $("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
         // e.preventDefault();
         const measure = $(this).attr("data-measure");
@@ -25,7 +30,9 @@
         render();
     });
 
-    // watch daterange
+    /**
+     * Watch measure inputs
+     */
     $("#js-content-wrapper").on("change", ".js-date-selector", function (e) {
         STATE.setDateStart($("#js-start-date").val());
         STATE.setDateEnd($("#js-end-date").val());
@@ -35,14 +42,17 @@
         });
     });
 
-    //watch legend call back items
+    /**
+     * watch legend call back items - this does nothing.
+     */
     $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
         // e.preventDefault();
         legendClickCallback(e);
-        alert("hello");
     });
 
-    // watch unit-selector
+    /**
+     * watch unit selector buttons
+     */
     $("#js-content-wrapper").on("click", ".unit button", function (e) {
         // e.preventDefault();
         const measure = $(this).attr("data-measure");
@@ -54,25 +64,34 @@
         render();
     });
 
-    // watch location
+    /**
+     * watch location input on splash screen
+     */
     $("#js-content-wrapper").on("keyup", "#js-location-selector", function () {
         const geoRes = geolocate($(this).val());
         renderGeoRes();
     });
 
-    // watch ok error
+    /**
+     * watch ok button (proceed) on error api intermodal.
+     */
     $("#js-content-wrapper").on("click", "#js-clear-error", function (e) {
         e.preventDefault();
         renderError();
     });
 
-    //watch go back
+    /**
+     * watch goback anchor (return to splash)
+     */
     $("#js-content-wrapper").on("click", "#js-go-back", function (e) {
         e.preventDefault();
         renderSplash();
     });
 })();
 
+/**
+ * A work in progress - effectively does nothing.
+ */
 function legendClickCallback(event) {
     event = event || window.event;
 

@@ -1,4 +1,7 @@
-// Render
+/**
+ * Builds a chart to html canvas element using the ChartJS.
+ * @param {string} measure - Indicates the type of chart to render, i,e air temp, air pressure, wind rose.
+ */
 function renderChart(measure) {
     const data = getChartData(measure);
     const ctx = STATE.chartCtx;

@@ -1,3 +1,6 @@
+/**
+ * Class representing all the points of a windrose.  Objects of class are used as template to create the windrose datasets for ChartJS.
+ */
 class WindRoseData {
     N = 0;
     NNW = 0;

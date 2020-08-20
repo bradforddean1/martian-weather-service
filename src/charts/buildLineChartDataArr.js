@@ -1,4 +1,13 @@
-function buildLineChartDataArr(planets, metric, measure) {
+/**
+ * Generates 3 arrays of data points from input in format required for ChartJS dataset.
+ * This function formats datpoints in manner approriate for a line/bar chart.
+ * @author Bradford Dean Wilson <bradford.dean.wilson@gmail.com>
+ * @param {object} planets – Earth and mars datasets to be formated.
+ * @param {string} metric – String indicating metic data is collected form, i.e. avg, min, max..
+ * @return {Object} Object containing three arrays: {earth, mars, labels}.
+ *
+ */
+function buildLineChartDataArr(planets, metric) {
     const lnCrtdataArr = {
         labels: [],
         earth: [],
@@ -20,7 +29,6 @@ function buildLineChartDataArr(planets, metric, measure) {
     ) {
         lnCrtdataArr.labels.push(
             date.format("M-D").toString().concat(" vs. ", getSol(i))
-            //get UTC from and compare to range...
         );
 
         for (let [planetName, planetData] of Object.entries(planets)) {

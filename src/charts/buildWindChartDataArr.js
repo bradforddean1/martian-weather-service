@@ -1,3 +1,12 @@
+/**
+ * Generates 3 arrays of data points from input in format required for ChartJS dataset.
+ * This function formats datpoints in manner approriate for a polar area chart used to chart a wind rose.
+ * @author Bradford Dean Wilson <bradford.dean.wilson@gmail.com>
+ * @param {object} planets – Earth and mars datasets to be formated.
+ * @return {Object} Object containing three arrays: {earth, mars, labels}.
+ *
+ */
+
 function buildWindChartDataArr(planets) {
     const windCrtdataArr = { labels: [], earth: [], mars: [] };
 

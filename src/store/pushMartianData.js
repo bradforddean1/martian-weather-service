@@ -1,3 +1,7 @@
+/**
+ * Populates martian weather data store with a passed in dataset.
+ * @param {object} data - Data to be populated in store
+ */
 function pushMartianData(data) {
     for (i = 0, keys = Object.keys(data); i < keys.length - 2; i++) {
         try {

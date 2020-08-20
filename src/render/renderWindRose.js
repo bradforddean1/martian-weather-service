@@ -1,3 +1,6 @@
+/**
+ * unused
+ */
 function renderWindRose(ctx, data) {
     const options = {
         scales: {

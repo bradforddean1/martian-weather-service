@@ -1,11 +1,10 @@
 (function ($) {
+    const render = () => {
+        const measure = STATE.activemeasure;
 
-  const render = () => {
-      const measure = STATE.activemeasure;
-
-      if (measure) {
-          //prettier-ignore
-          const html = $("#js-content-wrapper").html(
+        if (measure) {
+            //prettier-ignore
+            const html = $("#js-content-wrapper").html(
               `
               <header class="bg-dark">
                       <div class="container" style="">
@@ -109,19 +108,18 @@
               </footer>`
           );
 
-          if (STATE.apiError.length > 0) {
-              renderError();
-          }
+            if (STATE.apiError.length > 0) {
+                renderError();
+            }
 
-          STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
-          STATE.chartLegend = $(html).find("#legend");
+            STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
+            STATE.chartLegend = $(html).find("#legend");
 
-          renderChart(measure);
-      } else {
-          renderSplash();
-      }
-  }
-
+            renderChart(measure);
+        } else {
+            renderSplash();
+        }
+    };
 
     //watch compare
     $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (
@@ -198,7 +196,7 @@
         renderSplash();
     });
 
-    $(window).on('load', () => {
-      render();
+    $(window).on("load", () => {
+        render();
     });
 })(window.jQuery);

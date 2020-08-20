@@ -1,3 +1,6 @@
+/**
+ * Renders a dynamic content section with chart and data table (defined in renderChart) and unit selector.
+ */
 function renderData() {
     const measure = STATE.activemeasure;
 

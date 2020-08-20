@@ -1,6 +1,8 @@
+/**
+ * Renders (or clears) the #js-geo-result-cont element html, when a valid location is recorded.  If no location is recorded (STORE.earthWeather.location) wll clear any location rendered.  If called with submit = true will render form validation errors pertaining to location recorded or lack there of.
+ */
 function renderGeoRes(submit = false) {
     //prettier-ignore
-    console.log('renderGeoRes submit', submit)
     const html = $("#js-geo-result-cont").html(`
         ${
             submit
