@@ -1,18 +1,16 @@
 /**
  * Renders a dynamic content section with chart and data table (defined in renderChart) and unit selector.
  */
-function renderData() {
-    const measure = STATE.activemeasure;
-
+function renderData(measure = "at") {
     function getUnitContainer() {
         if (measure == "at") {
             return `
             <div class="container unit">
                 <button class="left ${
-                    STATE.isFarenheight ? "" : "toggle-on"
+                    STORE.isFarenheight ? "" : "toggle-on"
                 }" data-measure="at">°C</button>
                 <button class="right ${
-                    STATE.isFarenheight ? "toggle-on" : ""
+                    STORE.isFarenheight ? "toggle-on" : ""
                 }" data-measure="at">°F</button>
             </div>`;
         }
@@ -28,16 +26,16 @@ function renderData() {
             return `
             <div class="container unit">
                 <button class="left ${
-                    STATE.isMph ? "" : "toggle-on"
+                    STORE.isMph ? "" : "toggle-on"
                 }" data-measure="wind">kPh</button>
                 <button class="right ${
-                    STATE.isMph ? "toggle-on" : ""
+                    STORE.isMph ? "toggle-on" : ""
                 }" data-measure="wind">mPh</button>
             </div>`;
         }
     }
 
-    return `
+    const html = `
         <div class='container graph'>
             ${getUnitContainer()}
             <div class="chart-container fill">
@@ -46,4 +44,6 @@ function renderData() {
             <!-- width="400" height="400" -->
             <div class="legend" id="legend"></div>
         </div>`;
+
+    return html;
 }

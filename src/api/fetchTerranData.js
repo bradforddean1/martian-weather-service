@@ -38,7 +38,7 @@ function fetchTerranData() {
             );
         })
         .catch((err) => {
-            STATE.apiError.push(err);
+            STORE.apiError.push(err);
             return false;
         });
 }

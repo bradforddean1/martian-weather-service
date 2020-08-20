@@ -1,6 +1,10 @@
 /**
  * Terran and Martian weather data!
  * @namespace
+ * @property {boolean}isFarenheight - idenitifies unit of measure for air temprature.
+ * @property {boolean} isMph -identifies unit of measure for wind speed.
+ * @property {array} apiError - store of errors encountered during api call(s).
+ * @property {string} activemeasure - active measure (for mobile rndering) i.e. "at", "pressure", "wind"
  * @property {object} martianWeather - martian weather data store
  * @property {array} martianWeather.at - array of air temperature data
  * @property {array} martianWeather.pressure - array of air pressure data
@@ -15,6 +19,10 @@
  * @property {array} earthWeather.wind - array of wind behavioral data
  */
 const STORE = {
+    isFarenheight: false,
+    isMph: false,
+    apiError: [],
+    activemeasure: "at", //"at", "pressure", "wind"
     martianWeather: {
         at: [],
         pressure: [],
@@ -35,6 +43,15 @@ const STORE = {
                 }
                 return false;
             },
+
+            /**
+             * reset all location parameters to null
+             */
+            reset: function () {
+                this.address = "";
+                this.lat = null;
+                this.lon = null;
+            },
         },
         at: [],
         pressure: [],
@@ -51,13 +68,13 @@ const STORE = {
             return Math.round(value).toString();
         };
 
-        if (measure == "at" && STATE.isFarenheight) {
+        if (measure == "at" && STORE.isFarenheight) {
             convert = function (value) {
                 if (typeof (value != "undefined")) {
                     return Math.round(celsiusToFahrenheit(value)).toString();
                 }
             };
-        } else if (measure == "wind" && STATE.isMph) {
+        } else if (measure == "wind" && STORE.isMph) {
             convert = function (value) {
                 if (typeof (value != "undefined")) {
                     return Math.round(kphToMph(value)).toString();

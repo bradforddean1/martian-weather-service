@@ -13,7 +13,7 @@ function pushMartianData(data) {
                 low: data[keys[i]].AT.mn,
             });
         } catch (error) {
-            STATE.apiError.push(error);
+            STORE.apiError.push(error);
         }
 
         try {
@@ -25,7 +25,7 @@ function pushMartianData(data) {
                 low: data[keys[i]].PRE.mn,
             });
         } catch (error) {
-            STATE.apiError.push(error);
+            STORE.apiError.push(error);
         }
         try {
             STORE.martianWeather.wind.push({
@@ -36,7 +36,7 @@ function pushMartianData(data) {
                 windDir: data[keys[i]].WD.most_common.compass_point,
             });
         } catch (error) {
-            STATE.apiError.push(error);
+            STORE.apiError.push(error);
         }
     }
 }

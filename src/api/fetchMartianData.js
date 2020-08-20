@@ -33,7 +33,7 @@ function fetchMartianData() {
             return response;
         })
         .catch((err) => {
-            STATE.apiError.push(err);
+            STORE.apiError.push(err);
             return false;
         });
 }

@@ -2,15 +2,15 @@
  * Renders (or clears) the #api-error element html, when errors are presnt in then apiErrors array.  If renderError is run and no erros are present empty the #api-erro element.
  */
 function renderError() {
-    const error = STATE.apiError;
+    const error = STORE.apiError;
     const errorInDom = $("#js-content-wrapper").find(".api-error");
 
     if (errorInDom) {
         $(errorInDom).remove();
     }
 
-    if (STATE.apiError.length > 0) {
-        STATE.apiError = [];
+    if (STORE.apiError.length > 0) {
+        STORE.apiError = [];
         let errorText = [];
         for (const e of error) {
             errorText.push(`<span>${e}</span>`);

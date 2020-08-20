@@ -57,9 +57,9 @@
         // e.preventDefault();
         const measure = $(this).attr("data-measure");
         if (measure == "at") {
-            STATE.isFarenheight = !STATE.isFarenheight;
+            STORE.isFarenheight = !STORE.isFarenheight;
         } else if (measure == "wind") {
-            STATE.isMph = !STATE.isMph;
+            STORE.isMph = !STORE.isMph;
         }
         render();
     });

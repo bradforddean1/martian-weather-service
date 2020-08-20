@@ -2,10 +2,10 @@
     const render = () => {
         const measure = STATE.activemeasure;
 
-        if (measure) {
+        if (STORE.earthWeather.location.isLocSet()) {
             //prettier-ignore
             const html = $("#js-content-wrapper").html(
-              `
+              ` 
               <header class="bg-dark">
                       <div class="container" style="">
                           <h2>
@@ -80,8 +80,8 @@
                               </div>
                           </div>
                       </div>
-                      <div class = "main-content">
-                          ${renderData()}
+                      <div class="main-content">
+                        ${renderData(measure)}
                       </div>
                   </div>
               </main>
@@ -108,14 +108,15 @@
               </footer>`
           );
 
-            if (STATE.apiError.length > 0) {
+            renderChart(
+                measure,
+                $(html).find("#myChart")[0].getContext("2d"),
+                $(html).find("#legend")
+            );
+
+            if (STORE.apiError.length > 0) {
                 renderError();
             }
-
-            STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
-            STATE.chartLegend = $(html).find("#legend");
-
-            renderChart(measure);
         } else {
             renderSplash();
         }
@@ -145,8 +146,7 @@
     //watch measure
     $("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
         e.preventDefault();
-        const measure = $(this).attr("data-measure");
-        STATE.activemeasure = measure;
+        STATE.activemeasure = $(this).attr("data-measure");
         render();
     });
 
@@ -170,9 +170,9 @@
         e.preventDefault();
         const measure = $(this).attr("data-measure");
         if (measure == "at") {
-            STATE.isFarenheight = !STATE.isFarenheight;
+            STORE.isFarenheight = !STORE.isFarenheight;
         } else if (measure == "wind") {
-            STATE.isMph = !STATE.isMph;
+            STORE.isMph = !STORE.isMph;
         }
         render();
     });
@@ -193,7 +193,8 @@
     //watch go back
     $("#js-content-wrapper").on("click", "#js-go-back", function (e) {
         e.preventDefault();
-        renderSplash();
+        STORE.earthWeather.location.reset();
+        render();
     });
 
     $(window).on("load", () => {

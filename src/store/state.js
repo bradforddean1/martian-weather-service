@@ -1,56 +1,51 @@
 /**
- * Global state parameters.
+ * tbd
+ * @namespace
+ * @property {boolean}isFarenheight - idenitifies unit of measure for air temprature.
+ * @property {boolean} isMph -identifies unit of measure for wind speed.
+ * @property {array} apiError - store of errors encountered during api call(s).
+ * @property {string} activemeasure - active measure (for mobile rndering) i.e. "at", "pressure", "wind"
  */
 const STATE = {
     isFarenheight: false,
     isMph: false,
     apiError: [],
-    activemeasure: null, //"temp", "pres", "wind"
+    activemeasure: "at",
     dateStart: null,
     dateEnd: null,
-    solStart: null,
-    solEnd: null,
     /**
-     * Set the start date (roman) property, Insight Sol Date propery from string input
+     * Set the start date (roman calendar) property, Insight Sol Date propery from string input
      * @param {string} date
      */
     setDateStart: function (date) {
         this.dateStart = moment(date);
-        this.solStart =
-            this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
-            this.getNumDays();
     },
+
     /**
-     * Set the end date (roman) property, Insight Sol Date propery from string input
+     * Set the end date (roman calendar) property, Insight Sol Date propery from string input
      * @param {string} date
      */
     setDateEnd: function (date) {
         this.dateEnd = moment(date);
-        this.solEnd = this.utcToMartianDate(this.dateEnd);
     },
+
     /**
-     * Get the date in Sols (as defined by NASA INsight program) from sol date property, if not set will set a new date.
-     * @returns {integer} - The defined sol start date.
+     * Get the start date of range in Sols (as defined by NASA INsight program) calculated from the dateEnd property, if not set will set a new date.
+     * @returns {integer} - The sol corresponing with the currently set start date.
      */
     getSolStart: function () {
-        if (!this.solStart) {
-            this.solStart =
-                this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
-                this.getNumDays();
-            return this.solStart;
-        } else {
-            return this.solStart;
-        }
+        return (
+            this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
+            this.getNumDays()
+        );
     },
+
     /**
-     * Get the last dat of date date range in Sols (as defined by NASA INsight program) from sol date property, if not set will set a new date from default.
+     * Get the end date of range in Sols (as defined by NASA INsight program) calculated from the dateEnd, if not set will set a new date from default.
      * @returns {integer} - The sol corresponing with the currently set end date.
      */
     getSolEnd: function () {
-        if (!this.solEnd) {
-            this.solEnd = this.utcToMartianDate(this.dateEnd);
-        }
-        return this.solEnd;
+        return this.utcToMartianDate(this.dateEnd);
     },
 
     /**
@@ -103,11 +98,4 @@ const STATE = {
         const sol = Math.abs(beginTimeKeep.diff(utc, "days")) / 1.0274912517;
         return Math.floor(sol);
     },
-
-    /**
-     * Holds html5 canvas reference for Chart.js output
-     * These may be able to be removed...
-     */
-    chartCtx: null,
-    chartLegend: null,
 };
