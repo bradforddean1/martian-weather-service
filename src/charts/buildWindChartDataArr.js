@@ -35,3 +35,5 @@ function buildWindChartDataArr(planets) {
 
     return windCrtdataArr;
 }
+
+export default buildWindChartDataArr;

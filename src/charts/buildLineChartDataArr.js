@@ -40,3 +40,5 @@ function buildLineChartDataArr(planets, metric) {
 
     return lnCrtdataArr;
 }
+
+export default buildLineChartDataArr;
