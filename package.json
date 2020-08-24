@@ -1,0 +1,60 @@
+{
+  "name": "martian-weather-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "build": "webpack --config ./webpack.config.prod.js",
+    "clean:build": "rimraf ./build && mkdir build",
+    "dev": "webpack-dev-server --config webpack.config.dev.js --port 3001",
+    "prebuild": "run-p clean:build",
+    "postDevBuild": "run-p serve:build",
+    "serve:build": "http-server ./build",
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bradforddean1/martian-weather-service.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bradforddean1/martian-weather-service/issues"
+  },
+  "homepage": "https://github.com/bradforddean1/martian-weather-service#readme",
+  "devDependencies": {
+    "@babel/core": "^7.11.1",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.1.0",
+    "babel-preset-react-app": "^9.1.2",
+    "css-loader": "^4.2.1",
+    "cssnano": "^4.1.10",
+    "eslint": "^7.6.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-react": "^7.20.5",
+    "file-loader": "^6.0.0",
+    "html-webpack-plugin": "^4.3.0",
+    "http-server": "^0.12.3",
+    "image-webpack-loader": "^6.0.0",
+    "mini-css-extract-plugin": "^0.9.0",
+    "node-sass": "^4.14.1",
+    "npm-run-all": "^4.1.5",
+    "path": "^0.12.7",
+    "postcss-loader": "^3.0.0",
+    "rimraf": "^3.0.2",
+    "sass-loader": "^9.0.3",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.44.1",
+    "webpack-bundle-analyzer": "^3.8.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "dotenv-webpack": "^2.0.0",
+    "express": "^4.17.1",
+    "jquery": "^3.5.1"
+  }
+}

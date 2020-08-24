@@ -1,10 +1,10 @@
 /**
  * tbd
  * @namespace
- * @property {boolean}isFarenheight - idenitifies unit of measure for air temprature.
- * @property {boolean} isMph -identifies unit of measure for wind speed.
- * @property {array} apiError - store of errors encountered during api call(s).
- * @property {string} activemeasure - active measure (for mobile rndering) i.e. "at", "pressure", "wind"
+ * @property {boolean}  isFarenheight - idenitifies unit of measure for air temprature.
+ * @property {boolean}  isMph         - identifies unit of measure for wind speed.
+ * @property {array}    apiError      - store of errors encountered during api call(s).
+ * @property {string}   activemeasure - active measure (for mobile rndering) i.e. "at", "pressure", "wind"
  */
 const STATE = {
     isFarenheight: false,
