@@ -4,7 +4,7 @@
  * @return {Promise} Promise object with response data from the server
  *
  */
-function fetchTerranData() {
+function fetchTerranData(dateRange) {
     const headers = new Headers();
     headers.append("x-api-key", "BXfdILEuBoXF0cB2NIrZVc5ileNAC4lW");
     // headers.append("Access-Control-Allow-Origin", "*");
@@ -19,8 +19,8 @@ function fetchTerranData() {
         lat: STORE.earthWeather.location.lat,
         lon: STORE.earthWeather.location.lon,
         alt: 336,
-        start: STATE.getDateStart("YYYY-MM-DD"),
-        end: STATE.getDateEnd("YYYY-MM-DD"),
+        start: dateRange.getDateStart("YYYY-MM-DD"),
+        end: dateRange.getDateEnd("YYYY-MM-DD"),
     };
 
     params = formatQueryParams(params);
@@ -38,7 +38,7 @@ function fetchTerranData() {
             );
         })
         .catch((err) => {
-            STORE.apiError.push(err);
+            STATE.apiError.push(err);
             return false;
         });
 }

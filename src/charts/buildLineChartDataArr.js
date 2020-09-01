@@ -7,7 +7,7 @@
  * @return {Object} Object containing three arrays: {earth, mars, labels}.
  *
  */
-function buildLineChartDataArr(planets, metric) {
+function buildLineChartDataArr(planets, metric, dateRange) {
     const lnCrtdataArr = {
         labels: [],
         earth: [],
@@ -23,8 +23,8 @@ function buildLineChartDataArr(planets, metric) {
     }
 
     for (
-        let i = 0, date = moment(STATE.getDateStart());
-        i < STATE.getNumDays();
+        let i = 0, date = moment(dateRange.getDateStart());
+        i < dateRange.getNumDays();
         i++
     ) {
         lnCrtdataArr.labels.push(
@@ -40,5 +40,3 @@ function buildLineChartDataArr(planets, metric) {
 
     return lnCrtdataArr;
 }
-
-export default buildLineChartDataArr;

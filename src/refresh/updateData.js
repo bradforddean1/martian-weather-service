@@ -4,10 +4,10 @@
  * @return {Promise} Promise object with response data from the server
  *
  */
-function updateData() {
+function updateData(dateRange) {
     refreshDataArr();
 
-    const response = [fetchMartianData(), fetchTerranData()];
+    const response = [fetchMartianData(), fetchTerranData(dateRange)];
 
     return Promise.all(response).then(function (values) {
         if (values[0]) {

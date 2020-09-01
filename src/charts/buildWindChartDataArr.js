@@ -7,7 +7,7 @@
  *
  */
 
-function buildWindChartDataArr(planets) {
+function buildWindChartDataArr(planets, dateRange) {
     const windCrtdataArr = { labels: [], earth: [], mars: [] };
 
     const windObjs = {
@@ -15,7 +15,8 @@ function buildWindChartDataArr(planets) {
         mars: new WindRoseData(),
     };
 
-    for (let i = 0; i < STATE.getNumDays(); i++) {
+    const len = dateRange.getNumDays();
+    for (let i = 0; i < len; i++) {
         for (let [planetName, planetData] of Object.entries(planets)) {
             if (
                 windObjs[planetName][planetData[i].windDir] < planetData[i].avg
@@ -35,5 +36,3 @@ function buildWindChartDataArr(planets) {
 
     return windCrtdataArr;
 }
-
-export default buildWindChartDataArr;

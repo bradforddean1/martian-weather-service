@@ -43,7 +43,7 @@ const STORE = {
                 this.address = "";
                 this.lat = null;
                 this.lon = null;
-            }
+            },
         },
         at: [],
         pressure: [],

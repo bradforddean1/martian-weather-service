@@ -1,6 +1,8 @@
-import $ from 'jquery';
-import STORE from 'src/store/store.js';
-import STATE from 'src/store/STATE.js';
+import $ from "jquery";
+import renderData from "./src/render/renderData";
+import DateRangePicker from "./src/classes/dateRangePicker";
+
+const dateRange = new DateRangePicker();
 
 const render = () => {
     const measure = STATE.activemeasure;
@@ -24,63 +26,7 @@ const render = () => {
               <div class="vbox full-height">
                   <div class="horz-borders">
                       <div class ="centered-content fill">
-                          <div class="container date-selector ">
-                              <h3>Select Date Range:</h3>
-                              <form
-                                  id="js-date-picker"
-                                  class="container ctr-justified"
-                                  action="submit"
-                              >
-                                  <div class="container date-range-picker">
-                                      <div class="container date-picker">
-                                          <input
-                                              type="date"
-                                              name="start-date"
-                                              title="start date"
-                                              id="js-start-date"
-                                              class="js-date-selector"
-                                              value="${STATE.getDateStart(
-                                                  "YYYY-MM-DD"
-                                              )}"
-                                              max="${moment().format(
-                                                  "YYYY-MM-DD"
-                                              )}"
-                                              min="${moment()
-                                                  .subtract(6, "days")
-                                                  .format("YYYY-MM-DD")}"
-                                          />
-                                          <span
-                                              class="sol"
-                                              id="js-sol-start"
-                                          >Sol ${STATE.getSolStart()}
-                                          </span>
-                                      </div>
-                                      <div class="container date-picker">
-                                          <input
-                                              type="date"
-                                              name="end-date"
-                                              title="end date"
-                                              id="js-end-date"
-                                              class="js-date-selector"
-                                              value="${STATE.getDateEnd(
-                                                  "YYYY-MM-DD"
-                                              )}"
-                                              max="${moment().format(
-                                                  "YYYY-MM-DD"
-                                              )}"
-                                              min="${moment()
-                                                  .subtract(6, "days")
-                                                  .format("YYYY-MM-DD")}"
-                                          />
-                                          <span
-                                              class="sol"
-                                              id="js-sol-end"
-                                          >Sol ${STATE.getSolEnd()}
-                                          </span>
-                                      </div>
-                                  </div>
-                              </form>
-                          </div>
+                          ${dateRange.render()}
                       </div>
                   </div>
                   <div class="main-content">
@@ -113,11 +59,12 @@ const render = () => {
 
         renderChart(
             measure,
+            dateRange,
             $(html).find("#myChart")[0].getContext("2d"),
             $(html).find("#legend")
         );
 
-        if (STORE.apiError.length > 0) {
+        if (STATE.apiError.length > 0) {
             renderError();
         }
     } else {
@@ -126,16 +73,14 @@ const render = () => {
 };
 
 //watch compare
-$("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (
-    e
-) {
+$("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (e) {
     e.preventDefault();
 
     if (!STORE.earthWeather.location.isLocSet()) {
         renderGeoRes(true);
     } else {
         geolocate($("#js-location-selector").val()).then(() => {
-            updateData().then(() => {
+            updateData(dateRange).then(() => {
                 STATE.activemeasure = "at";
                 render();
             });
@@ -153,31 +98,9 @@ $("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
     render();
 });
 
-// watch daterange
-$("#js-content-wrapper").on("change", ".js-date-selector", function () {
-    STATE.setDateStart($("#js-start-date").val());
-    STATE.setDateEnd($("#js-end-date").val());
-
-    updateData().then(() => {
-        render();
-    });
-});
-
 //watch legend call back items
 $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
     legendClickCallback(e);
-});
-
-// watch unit-selector
-$("#js-content-wrapper").on("click", ".unit button", function (e) {
-    e.preventDefault();
-    const measure = $(this).attr("data-measure");
-    if (measure == "at") {
-        STORE.isFarenheight = !STORE.isFarenheight;
-    } else if (measure == "wind") {
-        STORE.isMph = !STORE.isMph;
-    }
-    render();
 });
 
 // watch location

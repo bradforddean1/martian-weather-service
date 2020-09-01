@@ -6,7 +6,7 @@
  * @return {Object} Object containing two arrays: {labels, datasets}.
  *
  */
-function getChartData(measure) {
+function getChartData(measure, dateRange) {
     const data = { labels: [], datasets: [] };
 
     // validate datatype from DOM
@@ -21,7 +21,7 @@ function getChartData(measure) {
 
     //If # of days retrieved are not = to the num days query, do not render this data set.
     Object.keys(dataSrc).forEach((planet) => {
-        const len = STATE.getNumDays();
+        const len = dateRange.getNumDays();
         if (dataSrc[planet].length < len) {
             for (let i = 0; i < len; i++) {
                 dataSrc[planet].push({ Error: "Missing Days" });
@@ -34,9 +34,9 @@ function getChartData(measure) {
 
     let dataArr = null;
     if (measure == "wind") {
-        dataArr = buildWindChartDataArr(dataSrc);
+        dataArr = buildWindChartDataArr(dataSrc, dateRange);
     } else {
-        dataArr = buildLineChartDataArr(dataSrc, metrics, measure);
+        dataArr = buildLineChartDataArr(dataSrc, metrics, dateRange);
     }
 
     data.labels = dataArr.labels;
