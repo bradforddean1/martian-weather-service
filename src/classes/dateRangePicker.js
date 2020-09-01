@@ -1,3 +1,5 @@
+import { render } from '../../app';
+
 /**
  * Defines functionality of date-range picker component.  Handles change in date and returns both Martian and Terran dates in range.
  * @property {object} dateStart
