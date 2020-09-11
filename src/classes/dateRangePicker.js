@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { render } from "../../app";
+=======
+import { render } from '../../app';
+>>>>>>> d3a17179470ab7e67f65d52e506211349b4c2f72
 
 /**
  * Defines functionality of date-range picker component.  Handles change in date and returns both Martian and Terran dates in range.
