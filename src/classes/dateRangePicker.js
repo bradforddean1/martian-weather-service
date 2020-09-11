@@ -1,3 +1,5 @@
+import { render } from "../../app";
+
 /**
  * Defines functionality of date-range picker component.  Handles change in date and returns both Martian and Terran dates in range.
  * @property {object} dateStart
@@ -98,12 +100,11 @@ class DateRangePicker {
      * Date Selector change handler
      */
     handleDateChange() {
-        this.setDateStart($("#js-start-date").val());
-        this.setDateEnd($("#js-end-date").val());
-
-        updateData(this).then(() => {
-            render();
-        });
+        // this.setDateStart($("#js-start-date").val());
+        // this.setDateEnd($("#js-end-date").val());
+        // updateData(this).then(() => {
+        //     render();
+        // });
     }
 
     /**

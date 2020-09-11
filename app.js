@@ -126,3 +126,5 @@ $("#js-content-wrapper").on("click", "#js-go-back", function (e) {
 $(window).on("load", () => {
     render();
 });
+
+export { render };
