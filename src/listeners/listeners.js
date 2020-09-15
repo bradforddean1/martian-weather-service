@@ -5,20 +5,20 @@
     /**
      * Watch compare button
      */
-    $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (
-        e
-    ) {
-        e.preventDefault();
-
-        if (!STORE.earthWeather.location.isLocSet()) {
-            renderGeoRes(true);
-        } else {
-            updateData().then(() => {
-                STATE.activemeasure = "at";
-                render();
-            });
-        }
-    });
+    // $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (
+    //     e
+    // ) {
+    //     e.preventDefault();
+    //
+    //     if (!STORE.earthWeather.location.isLocSet()) {
+    //         renderGeoRes(true);
+    //     } else {
+    //         updateData().then(() => {
+    //             STATE.activemeasure = "at";
+    //             render();
+    //         });
+    //     }
+    // });
 
     /**
      * Watch measure selctor buttons (mobile)

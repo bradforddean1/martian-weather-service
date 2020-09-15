@@ -6,7 +6,7 @@
  * @return {Promise} Promise object with boolean indicating success or fail.
  *
  */
-function geolocate(location) {
+async function geoLocate(location) {
     let params = {
         address: encodeURI(location),
         key: "AIzaSyBDJyedOS2VN3Fxz4eutyeM1_grLUQfp7s",
@@ -14,7 +14,14 @@ function geolocate(location) {
 
     params = formatQueryParams(params);
 
-    return fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`)
+    const geoData = {
+      address: null,
+      error: null,
+      lat: null,
+      lon: null
+    }
+
+    const data = fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`)
         .then((response) => {
             if (!response.ok) {
                 throw new Error(response.statusText);
@@ -27,19 +34,21 @@ function geolocate(location) {
                 throw new Error("No Result");
             }
 
-            STORE.earthWeather.location.lat =
-                responseJson.results[0].geometry.location.lat;
-            STORE.earthWeather.location.lon =
-                responseJson.results[0].geometry.location.lng;
-            STORE.earthWeather.location.address =
-                responseJson.results[0].formatted_address;
+            geoData.lat = responseJson.results[0].geometry.location.lat;
+            geoData.lon = responseJson.results[0].geometry.location.lng;
+            geoData.address = responseJson.results[0].formatted_address;
 
             return true;
         })
         .catch((err) => {
-            STORE.earthWeather.location.lat = null;
-            STORE.earthWeather.location.lon = null;
-            STORE.earthWeather.location.address = "";
+            geoData.address = "";
+            geoData.error = err;
+            geoData.lat = null;
+            geoData.lon = null;
             return false;
         });
+    await data;
+    return geoData;
 }
+
+export default geoLocate;
