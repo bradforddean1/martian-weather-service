@@ -16,11 +16,11 @@ function fetchTerranData(dateRange) {
     };
 
     let params = {
-        lat: '40.7484',
-        lon: '73.9857',
+        lat: '33.749',
+        lon: '-84.388',
         alt: 336,
-        start: '2020-09-17',
-        end: '2020-09-10',
+        start: '2020-08-01',
+        end: '2020-9-18',
     };
 
     params = formatQueryParams(params);
