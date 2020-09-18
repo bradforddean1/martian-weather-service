@@ -8,24 +8,35 @@ import fetchTerranData from '../api/fetchTerranData';
  * @return {Promise} Promise object with response data from the server
  *
  */
-async function getPlanetaryData(dateRange) {
+async function getPlanetaryData() {
     const planetaryData = {
       martian: Object.assign({}, defaultPlanetaryData),
       terran: Object.assign({}, defaultPlanetaryData)
     };
 
-    const response = [fetchMartianData(), fetchTerranData(dateRange)];
+    // const response = [fetchMartianData(), fetchTerranData(dateRange)];
 
-    const planetaryData = Promise.all(response).then(function (values) {
-        if (values[0]) {
-            console.log('martian', values[0])
-            // planetaryData.martian(values[0]);
-        }
-        if (values[1]) {
-            console.log('terran', values[1].data)
-            // planetaryData.terran(values[1].data);
-        }
-    });
+    const martianData = await fetchMartianData();
+    if (martianData) {
+        console.log('martian', martianData);
+        planetaryData.martian = martianData;
+    }
+    const terranData = await fetchTerranData();
+    if (terranData) {
+        console.log('terran', terranData.data);
+        planetaryData.martian = terranData.data;
+    }
+
+    // Promise.all(response).then(function (values) {
+    //     if (values[0]) {
+    //         console.log('martian', values[0])
+    //         // planetaryData.martian(values[0]);
+    //     }
+    //     if (values[1]) {
+    //         console.log('terran', values[1].data)
+    //         // planetaryData.terran(values[1].data);
+    //     }
+    // });
 }
 
 export default getPlanetaryData;

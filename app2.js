@@ -3,6 +3,7 @@ import renderSplash from './src/render/renderSplash';
 import geoLocate from './src/api/geoLocate';
 import isLocSet from './src/utils/isLocSet';
 import getPlanetaryData from './src/refresh/getPlanetaryData';
+import renderResults from './src/render/renderResults';
 
 const STORE = {
   apiError: [],
@@ -32,19 +33,22 @@ $(window).on("load", () => {
 
   $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (e) {
     e.preventDefault();
-    geolocate($("#js-location-selector").val())
+    geoLocate($("#js-location-selector").val())
     .then((geoData) => {
         if (geoData.error) {
             renderLocError();
         } else {
-            getPlanetaryData({})
+            getPlanetaryData({});
+            $("#js-content-wrapper").html(`
+              ${renderResults()}
+            `);
         // updateData(dateRange).then(() => {
         //     STORE.activemeasure = "at";
         //     render();
         // });
-    });
+    }
   });
-
+});
 
 
   $("#js-content-wrapper").html(`

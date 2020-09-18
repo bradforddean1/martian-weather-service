@@ -37,3 +37,5 @@ function fetchMartianData() {
             return false;
         });
 }
+
+export default fetchMartianData;

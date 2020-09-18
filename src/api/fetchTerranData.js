@@ -16,11 +16,11 @@ function fetchTerranData(dateRange) {
     };
 
     let params = {
-        lat: STORE.earthWeather.location.lat,
-        lon: STORE.earthWeather.location.lon,
+        lat: '40.7484',
+        lon: '73.9857',
         alt: 336,
-        start: dateRange.getDateStart("YYYY-MM-DD"),
-        end: dateRange.getDateEnd("YYYY-MM-DD"),
+        start: '2020-09-17',
+        end: '2020-09-10',
     };
 
     params = formatQueryParams(params);
@@ -42,3 +42,5 @@ function fetchTerranData(dateRange) {
             return false;
         });
 }
+
+export default fetchTerranData;
