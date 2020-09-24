@@ -29,7 +29,7 @@ async function getPlanetaryData(geoData, dateRange) {
             );
         })
         .catch((err) => {
-            STORE.apiError.push(err);
+            // STORE.apiError.push(err);
             return false;
         });
 
