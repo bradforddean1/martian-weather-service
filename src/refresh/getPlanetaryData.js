@@ -1,6 +1,6 @@
-import defaultPlanetaryData from './defaultPlanetaryData';
-import fetchMartianData from '../api/fetchMartianData';
-import fetchTerranData from '../api/fetchTerranData';
+import defaultPlanetaryData from "./defaultPlanetaryData";
+import fetchMartianData from "../api/fetchMartianData";
+import fetchTerranData from "../api/fetchTerranData";
 
 /**
  * Calls refreshDataArr, fetchMartianData, fetchTerranData, pushMartianData, and, pushTerranData to clear the STORE< onject, obtain frsh data from teran and earth API, and repopulate store with API data.
@@ -8,23 +8,24 @@ import fetchTerranData from '../api/fetchTerranData';
  * @return {Promise} Promise object with response data from the server
  *
  */
-async function getPlanetaryData() {
+async function getPlanetaryData(geoData, dateRange) {
     const planetaryData = {
-      martian: Object.assign({}, defaultPlanetaryData),
-      terran: Object.assign({}, defaultPlanetaryData)
+        martian: Object.assign({}, defaultPlanetaryData),
+        terran: Object.assign({}, defaultPlanetaryData),
     };
 
     // const response = [fetchMartianData(), fetchTerranData(dateRange)];
 
-    const martianData = await fetchMartianData();
-    if (martianData) {
-        console.log('martian', martianData);
+    const martianData = fetchMartianData();
+    const terranData = fetchTerranData(geoData, dateRange);
+
+    if (await martianData) {
+        console.log("martian", martianData);
         planetaryData.martian = martianData;
     }
-    const terranData = await fetchTerranData();
-    if (terranData) {
-        console.log('terran', terranData.data);
-        planetaryData.martian = terranData.data;
+    if (await terranData) {
+        console.log("terran", terranData);
+        planetaryData.martian = terranData;
     }
 
     // Promise.all(response).then(function (values) {
@@ -37,6 +38,8 @@ async function getPlanetaryData() {
     //         // planetaryData.terran(values[1].data);
     //     }
     // });
+
+    return planetaryData;
 }
 
 export default getPlanetaryData;

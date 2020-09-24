@@ -1,57 +1,57 @@
 import $ from "jquery";
-import renderSplash from './src/render/renderSplash';
-import geoLocate from './src/api/geoLocate';
-import isLocSet from './src/utils/isLocSet';
-import getPlanetaryData from './src/refresh/getPlanetaryData';
-import renderResults from './src/render/renderResults';
+import renderSplash from "./src/render/renderSplash";
+import geoLocate from "./src/api/geoLocate";
+import isLocSet from "./src/utils/isLocSet";
+import getPlanetaryData from "./src/refresh/getPlanetaryData";
+import renderResults from "./src/render/renderResults";
 
 const STORE = {
-  apiError: [],
-  activemeasure: "at",
-  martianWeather: {
-      at: [],
-      pressure: [],
-      wind: [],
-  },
-  earthWeather: {
-      location: {
-          address: "",
-          lat: null,
-          lon: null,
-      },
-      at: [],
-      pressure: [],
-      wind: [],
-  }
+    apiError: [],
+    activemeasure: "at",
+    martianWeather: {
+        at: [],
+        pressure: [],
+        wind: [],
+    },
+    earthWeather: {
+        location: {
+            address: "",
+            lat: null,
+            lon: null,
+        },
+        at: [],
+        pressure: [],
+        wind: [],
+    },
 };
 
-
-
 $(window).on("load", () => {
+    async function handleSubmitLocation() {
+        const geoData = geoLocate($("#js-location-selector").val());
 
-
-
-  $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (e) {
-    e.preventDefault();
-    geoLocate($("#js-location-selector").val())
-    .then((geoData) => {
-        if (geoData.error) {
+        if (await geoData.error) {
             renderLocError();
         } else {
-            getPlanetaryData({});
+            console.log(await geoData);
+            const planetaryData = getPlanetaryData(geoData, null);
             $("#js-content-wrapper").html(`
               ${renderResults()}
             `);
-        // updateData(dateRange).then(() => {
-        //     STORE.activemeasure = "at";
-        //     render();
-        // });
+            // updateData(dateRange).then(() => {
+            //     STORE.activemeasure = "at";
+            //     render();
+            // });
+        }
     }
-  });
-});
 
+    $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (
+        e
+    ) {
+        e.preventDefault();
+        handleSubmitLocation();
+    });
 
-  $("#js-content-wrapper").html(`
+    $("#js-content-wrapper").html(`
     ${renderSplash()}
   `);
 });
@@ -60,14 +60,6 @@ $(window).on("load", () => {
 // import DateRangePicker from "./src/classes/dateRangePicker";
 //
 // const dateRange = new DateRangePicker();
-
-
-
-
-
-
-
-
 
 // const renderApp = () => {
 //     const measure = STATE.activemeasure;

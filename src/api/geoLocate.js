@@ -1,3 +1,5 @@
+import formatQueryParams from "../utils/formatQueryParams";
+
 /**
  * Attempts to match the input to an actual location using the google geocding api.
  * With a successful match will set the standardized Postal Address, as well as Latitude and Longitude coordinates to the STORE variable.
@@ -15,13 +17,15 @@ async function geoLocate(location) {
     params = formatQueryParams(params);
 
     const geoData = {
-      address: null,
-      error: null,
-      lat: null,
-      lon: null
-    }
+        address: null,
+        error: null,
+        lat: null,
+        lon: null,
+    };
 
-    const data = fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`)
+    const data = fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?${params}`
+    )
         .then((response) => {
             if (!response.ok) {
                 throw new Error(response.statusText);

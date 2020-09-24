@@ -1,3 +1,5 @@
+import formatQueryParams from "../utils/formatQueryParams";
+
 /**
  * Fetches Martian weather data from NASA insight API https://api.nasa.gov/assets/insight/InSight%20Weather%20API%20Documentation.pdf
  * @author Bradford Dean Wilson <bradford.dean.wilson@gmail.com>
