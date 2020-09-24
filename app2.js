@@ -2,27 +2,23 @@ import $ from "jquery";
 import renderSplash from "./src/render/renderSplash";
 import geoLocate from "./src/api/geoLocate";
 import isLocSet from "./src/utils/isLocSet";
-import getPlanetaryData from "./src/refresh/getPlanetaryData";
+import getPlanetaryData from "./src/api/getPlanetaryData";
 import renderResults from "./src/render/renderResults";
 
 const STORE = {
     apiError: [],
     activemeasure: "at",
-    martianWeather: {
-        at: [],
-        pressure: [],
-        wind: [],
-    },
-    earthWeather: {
-        location: {
-            address: "",
-            lat: null,
-            lon: null,
-        },
-        at: [],
-        pressure: [],
-        wind: [],
-    },
+    planetaryData: {},
+    // martianWeather: {
+    //     at: [],
+    //     pressure: [],
+    //     wind: [],
+    // },
+    // earthWeather: {
+    //     at: [],
+    //     pressure: [],
+    //     wind: [],
+    // },
 };
 
 $(window).on("load", () => {
@@ -33,7 +29,11 @@ $(window).on("load", () => {
             renderLocError();
         } else {
             console.log(await geoData);
-            const planetaryData = getPlanetaryData(geoData, null);
+            STORE.planetaryData = getPlanetaryData(geoData, null);
+            //  Seems a bit sloppy just pushing api reuslts into the SOTRE... though is it necessary here to
+            //  to follow loop through the planetary Data Object and manually set each data point for the sake
+            //  of client side validation of the ata retrieved?  I know the server die rule never trust the cleint,
+            //  but does that go both ways, i.e. never trust the server when you control the server?
             $("#js-content-wrapper").html(`
               ${renderResults()}
             `);

@@ -1,12 +1,15 @@
+import defaultPlanetaryData from "./defaultPlanetaryData";
 import formatQueryParams from "../utils/formatQueryParams";
 
 /**
- * Fetches Martian weather data from NASA insight API https://api.nasa.gov/assets/insight/InSight%20Weather%20API%20Documentation.pdf
+ * Calls refreshDataArr, retieves MartianData and TerranData from server with fetch API call.
  * @author Bradford Dean Wilson <bradford.dean.wilson@gmail.com>
  * @return {Promise} Promise object with response data from the server
  *
  */
-function fetchMartianData() {
+async function getPlanetaryData(geoData, dateRange) {
+    const planetaryData = Object.assign({}, defaultPlanetaryData);
+
     //prettier-ignore
     let params = {
         api_key: "JRPWKpyWr5JcEdUsLMypoII5iBeMaSn1Oy94DnkF",
@@ -16,7 +19,7 @@ function fetchMartianData() {
 
     params = formatQueryParams(params);
 
-    return fetch(`https://api.nasa.gov/insight_weather/?${params}`)
+    const res = fetch(`https://api.nasa.gov/insight_weather/?${params}`)
         .then((response) => {
             if (response.ok) {
                 return response.json();
@@ -25,19 +28,17 @@ function fetchMartianData() {
                 "Failed to retrieve Martian data from the NASA Insight program"
             );
         })
-        .then((response) => {
-            // for (let [key, value] of Object.keys(response)) {
-            //     if (moment.utc(value.Last_UTC).isAfter(end)) {
-            //         // filteredResponse.push(response[key]);
-            //     }
-            // }
-
-            return response;
-        })
         .catch((err) => {
             STORE.apiError.push(err);
             return false;
         });
+
+    if (await res) {
+        console.log(res);
+        planetaryData = res;
+    }
+
+    return planetaryData;
 }
 
-export default fetchMartianData;
+export default getPlanetaryData;
