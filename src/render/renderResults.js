@@ -1,8 +1,8 @@
 import header from "./renderHeader";
 
-const renderResult = () => {
+const renderResult = (address) => {
     return `
-        ${header()}  
+        ${header(address)}  
         <p>I am the result page.</p>
         `;
 };

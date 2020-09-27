@@ -23,14 +23,13 @@ const STORE = {
 
 $(window).on("load", () => {
     async function handleSubmitLocation() {
-        const geoData = geoLocate($("#js-location-selector").val());
-
-        if (await geoData.error) {
+        const geoQuery = geoLocate($("#js-location-selector").val());
+        const geoData = await geoQuery;
+        if (geoData.error) {
             renderLocError();
         } else {
-            console.log(await geoData);
-            const res = getPlanetaryData(geoData, null);
-            STORE.planetaryData = await res;
+            const weatherQuery = getPlanetaryData(geoData, null);
+            STORE.planetaryData = await weatherQuery;
             //  Seems a bit sloppy just pushing api reuslts into the STORE... though is it necessary here to
             //  to follow loop through the planetary Data Object and manually set each data point for the sake
             //  of client side validation of the data retrieved?  I know the server side rule: never trust the cleint,
@@ -38,6 +37,8 @@ $(window).on("load", () => {
             $("#js-content-wrapper").html(`
               ${renderResults(geoData.address)}
             `);
+            console.log(geoData.address);
+
             // updateData(dateRange).then(() => {
             //     STORE.activemeasure = "at";
             //     render();
