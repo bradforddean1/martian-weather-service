@@ -29,13 +29,14 @@ $(window).on("load", () => {
             renderLocError();
         } else {
             console.log(await geoData);
-            STORE.planetaryData = getPlanetaryData(geoData, null);
-            //  Seems a bit sloppy just pushing api reuslts into the SOTRE... though is it necessary here to
+            const res = getPlanetaryData(geoData, null);
+            STORE.planetaryData = await res;
+            //  Seems a bit sloppy just pushing api reuslts into the STORE... though is it necessary here to
             //  to follow loop through the planetary Data Object and manually set each data point for the sake
-            //  of client side validation of the ata retrieved?  I know the server die rule never trust the cleint,
-            //  but does that go both ways, i.e. never trust the server when you control the server?
+            //  of client side validation of the data retrieved?  I know the server side rule: never trust the cleint,
+            //  but does that go both ways, i.e. never trust the server?
             $("#js-content-wrapper").html(`
-              ${renderResults()}
+              ${renderResults(geoData.address)}
             `);
             // updateData(dateRange).then(() => {
             //     STORE.activemeasure = "at";
