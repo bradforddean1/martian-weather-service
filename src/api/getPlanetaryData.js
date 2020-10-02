@@ -20,8 +20,7 @@ async function getPlanetaryData(geoData, dateRange) {
     };
 
     params = formatQueryParams(params);
-
-    const res = fetch(`http://localhost:8000/weather-data/?${params}`)
+    const res = fetch(`http://localhost:8080/weather-data/?${params}`)
         .then((response) => {
             if (response.ok) {
                 return response.json();
