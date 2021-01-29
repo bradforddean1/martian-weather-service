@@ -1,650 +1,663 @@
 // Conversions
 function degreesToBearing(deg) {
-    switch (true) {
-        case deg > 348.75 && deg <= 11.25:
-            dir = "N";
-            break;
-        case deg > 11.25 && deg <= 33.75:
-            dir = "NNE";
-            break;
-        case deg > 33.75 && deg <= 56.25:
-            dir = "NE";
-            break;
-        case deg > 56.25 && deg <= 78.75:
-            dir = "ENE";
-            break;
-        case deg > 78.75 && deg <= 101.25:
-            dir = "E";
-            break;
-        case deg > 101.25 && deg <= 123.75:
-            dir = "ESE";
-            break;
-        case deg > 123.75 && deg <= 146.25:
-            dir = "SE";
-            break;
-        case deg > 146.25 && deg <= 168.75:
-            dir = "SSE";
-            break;
-        case deg > 168.75 && deg <= 191.25:
-            dir = "S";
-            break;
-        case deg > 191.25 && deg <= 213.75:
-            dir = "SSW";
-            break;
-        case deg > 213.75 && deg <= 236.25:
-            dir = "SW";
-            break;
-        case deg > 236.25 && deg <= 258.75:
-            dir = "WSW";
-            break;
-        case deg > 258.75 && deg <= 281.25:
-            dir = "W";
-            break;
-        case deg > 281.25 && deg <= 303.75:
-            dir = "WNW";
-            break;
-        case deg > 303.75 && deg <= 326.25:
-            dir = "NW";
-            break;
-        case deg > 326.25 && deg <= 348.75:
-            dir = "NNW";
-            break;
-        default:
-            dir = null;
-            break;
-    }
-    return dir;
+	switch (true) {
+		case deg > 348.75 && deg <= 11.25:
+			dir = "N";
+			break;
+		case deg > 11.25 && deg <= 33.75:
+			dir = "NNE";
+			break;
+		case deg > 33.75 && deg <= 56.25:
+			dir = "NE";
+			break;
+		case deg > 56.25 && deg <= 78.75:
+			dir = "ENE";
+			break;
+		case deg > 78.75 && deg <= 101.25:
+			dir = "E";
+			break;
+		case deg > 101.25 && deg <= 123.75:
+			dir = "ESE";
+			break;
+		case deg > 123.75 && deg <= 146.25:
+			dir = "SE";
+			break;
+		case deg > 146.25 && deg <= 168.75:
+			dir = "SSE";
+			break;
+		case deg > 168.75 && deg <= 191.25:
+			dir = "S";
+			break;
+		case deg > 191.25 && deg <= 213.75:
+			dir = "SSW";
+			break;
+		case deg > 213.75 && deg <= 236.25:
+			dir = "SW";
+			break;
+		case deg > 236.25 && deg <= 258.75:
+			dir = "WSW";
+			break;
+		case deg > 258.75 && deg <= 281.25:
+			dir = "W";
+			break;
+		case deg > 281.25 && deg <= 303.75:
+			dir = "WNW";
+			break;
+		case deg > 303.75 && deg <= 326.25:
+			dir = "NW";
+			break;
+		case deg > 326.25 && deg <= 348.75:
+			dir = "NNW";
+			break;
+		default:
+			dir = null;
+			break;
+	}
+	return dir;
 }
 
 function celsiusToFahrenheit(celsius) {
-    return (celsius * 9) / 5 + 32;
+	return (celsius * 9) / 5 + 32;
 }
 
 function kphToMph(kph) {
-    return kph / 1.609344;
+	return kph / 1.609344;
 }
 
 // STORE
 const STORE = {
-    martianWeather: {
-        at: [],
-        pressure: [],
-        wind: [],
-    },
-    earthWeather: {
-        location: {
-            address: "",
-            lat: null,
-            lon: null,
-            isLocSet: function () {
-                if (this.address && this.lat && this.lon) {
-                    return true;
-                }
-                return false;
-            },
-        },
-        at: [],
-        pressure: [],
-        wind: [],
-    },
-    getConversionFunction: function (measure) {
-        // standard conversion function is return data as is, if a non-metric conversion is selected,
-        // a conversion function is defined. Always returns a rounded value.
-        let convert = function (value) {
-            return Math.round(value).toString();
-        };
+	martianWeather: {
+		at: [],
+		pressure: [],
+		wind: [],
+	},
+	earthWeather: {
+		location: {
+			address: "",
+			lat: null,
+			lon: null,
+			isLocSet: function () {
+				if (this.address && this.lat && this.lon) {
+					return true;
+				}
+				return false;
+			},
+		},
+		at: [],
+		pressure: [],
+		wind: [],
+	},
+	getConversionFunction: function (measure) {
+		// standard conversion function is return data as is, if a non-metric conversion is selected,
+		// a conversion function is defined. Always returns a rounded value.
+		let convert = function (value) {
+			return Math.round(value).toString();
+		};
 
-        if (measure == "at" && STATE.isFarenheight) {
-            convert = function (value) {
-                if (typeof (value != "undefined")) {
-                    return Math.round(celsiusToFahrenheit(value)).toString();
-                }
-            };
-        } else if (measure == "wind" && STATE.isMph) {
-            convert = function (value) {
-                if (typeof (value != "undefined")) {
-                    return Math.round(kphToMph(value)).toString();
-                }
-            };
-        }
-        return convert;
-    },
-    getDataByMeasure: function (measure, planet) {
-        // temp and wind data may need to be converted
-        if (measure == "at" || measure == "wind") {
-            const response = [];
+		if (measure == "at" && STATE.isFarenheight) {
+			convert = function (value) {
+				if (typeof (value != "undefined")) {
+					return Math.round(celsiusToFahrenheit(value)).toString();
+				}
+			};
+		} else if (measure == "wind" && STATE.isMph) {
+			convert = function (value) {
+				if (typeof (value != "undefined")) {
+					return Math.round(kphToMph(value)).toString();
+				}
+			};
+		}
+		return convert;
+	},
 
-            const convert = this.getConversionFunction(measure);
+	getDataByMeasure: function (measure, planet) {
+		// temp and wind data may need to be converted
+		if (measure == "at" || measure == "wind") {
+			const response = [];
 
-            // if conversion needed new array returned with convertable values converted.
-            if (measure == "at") {
-                if (planet == "martianWeather") {
-                    for (let val of this.martianWeather.at) {
-                        response.push({
-                            sol: val.sol,
-                            utc: val.utc,
-                            avg: convert(val.avg),
-                            high: convert(val.high),
-                            low: convert(val.low),
-                        });
-                    }
-                } else {
-                    for (let val of this.earthWeather.at) {
-                        response.push({
-                            utc: val.utc,
-                            avg: convert(val.avg),
-                            high: convert(val.high),
-                            low: convert(val.low),
-                        });
-                    }
-                }
-            } else if (measure == "wind") {
-                if (planet == "martianWeather") {
-                    for (let val of this.martianWeather.wind) {
-                        response.push({
-                            utc: val.utc,
-                            avg: convert(val.avg),
-                            high: convert(val.high),
-                            low: convert(val.low),
-                            windDir: val.windDir,
-                        });
-                    }
-                } else {
-                    for (let val of this.earthWeather.wind) {
-                        response.push({
-                            utc: val.utc,
-                            avg: convert(val.avg),
-                            windDir: val.windDir,
-                        });
-                    }
-                }
-            }
-            return response;
-        }
+			const convert = this.getConversionFunction(measure);
 
-        // Otherwise return the data as is.
-        return this[planet][measure];
-    },
+			// if conversion needed new array returned with convertable values converted.
+			if (measure == "at") {
+				if (planet == "martianWeather") {
+					for (let val of this.martianWeather.at) {
+						response.push({
+							sol: val.sol,
+							utc: val.utc,
+							avg: convert(val.avg),
+							high: convert(val.high),
+							low: convert(val.low),
+						});
+					}
+				} else {
+					for (let val of this.earthWeather.at) {
+						response.push({
+							utc: val.utc,
+							avg: convert(val.avg),
+							high: convert(val.high),
+							low: convert(val.low),
+						});
+					}
+				}
+			} else if (measure == "wind") {
+				if (planet == "martianWeather") {
+					for (let val of this.martianWeather.wind) {
+						response.push({
+							utc: val.utc,
+							avg: convert(val.avg),
+							high: convert(val.high),
+							low: convert(val.low),
+							windDir: val.windDir,
+						});
+					}
+				} else {
+					for (let val of this.earthWeather.wind) {
+						response.push({
+							utc: val.utc,
+							avg: convert(val.avg),
+							windDir: val.windDir,
+						});
+					}
+				}
+			}
+			return response;
+		}
 
-    getAverage: function (planet, measure) {
-        if (measure != "at" && measure != "pressure" && measure != "wind") {
-            return "no data";
-        }
+		// Otherwise return the data as is.
+		return this[planet][measure];
+	},
 
-        if (planet != "martianWeather" && planet != "earthWeather") {
-            return "no data";
-        }
+	getAverage: function (planet, measure) {
+		if (measure != "at" && measure != "pressure" && measure != "wind") {
+			return "no data";
+		}
 
-        let total = 0;
-        let count = 0;
-        for (const rot of this[planet][measure]) {
-            if (rot.avg) {
-                total += rot.avg;
-                count += 1;
-            }
-        }
+		if (planet != "martianWeather" && planet != "earthWeather") {
+			return "no data";
+		}
 
-        if (count < 1) {
-            return "no data";
-        }
+		let total = 0;
+		let count = 0;
+		for (const rot of this[planet][measure]) {
+			if (rot.avg) {
+				total += rot.avg;
+				count += 1;
+			}
+		}
 
-        const convert = this.getConversionFunction();
-        const avg = total / count;
-        return convert(avg);
-    },
+		if (count < 1) {
+			return "no data";
+		}
 
-    getMax: function (planet, measure) {
-        if (measure != "at" && measure != "pressure" && measure != "wind") {
-            return "no data";
-        }
+		const convert = this.getConversionFunction();
+		const avg = total / count;
+		return convert(avg);
+	},
 
-        if (planet != "martianWeather" && planet != "earthWeather") {
-            return "no data";
-        }
+	getMax: function (planet, measure) {
+		if (measure != "at" && measure != "pressure" && measure != "wind") {
+			return "no data";
+		}
 
-        const all = [];
-        for (const rot of this[planet][measure]) {
-            if (rot.high) {
-                all.push(rot.high);
-            }
-        }
+		if (planet != "martianWeather" && planet != "earthWeather") {
+			return "no data";
+		}
 
-        if (all.length < 1) {
-            return "no data";
-        }
+		const all = [];
+		for (const rot of this[planet][measure]) {
+			if (rot.high) {
+				all.push(rot.high);
+			}
+		}
 
-        const convert = this.getConversionFunction();
-        const avg = Math.max(...all);
-        return convert(avg);
-    },
-    getMin: function (planet, measure) {
-        if (measure != "at" && measure != "pressure" && measure != "wind") {
-            return "no data";
-        }
+		if (all.length < 1) {
+			return "no data";
+		}
 
-        if (planet != "martianWeather" && planet != "earthWeather") {
-            return "no data";
-        }
+		const convert = this.getConversionFunction();
+		const avg = Math.max(...all);
+		return convert(avg);
+	},
+	getMin: function (planet, measure) {
+		if (measure != "at" && measure != "pressure" && measure != "wind") {
+			return "no data";
+		}
 
-        const all = [];
-        for (const rot of this[planet][measure]) {
-            if (rot.low) {
-                all.push(rot.low);
-            }
-        }
+		if (planet != "martianWeather" && planet != "earthWeather") {
+			return "no data";
+		}
 
-        if (all.length < 1) {
-            return "no data";
-        }
+		const all = [];
+		for (const rot of this[planet][measure]) {
+			if (rot.low) {
+				all.push(rot.low);
+			}
+		}
 
-        const convert = this.getConversionFunction();
-        const avg = Math.min(...all);
-        return convert(avg);
-    },
+		if (all.length < 1) {
+			return "no data";
+		}
+
+		const convert = this.getConversionFunction();
+		const avg = Math.min(...all);
+		return convert(avg);
+	},
 };
 
 const STATE = {
-    isFarenheight: false,
-    isMph: false,
-    apiError: [],
-    activemeasure: null, //"temp", "pres", "wind"
-    dateStart: null,
-    dateEnd: null,
-    solStart: null,
-    solEnd: null,
-    setDateStart: function (date) {
-        this.dateStart = moment(date);
-        this.solStart =
-            this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
-            this.getNumDays();
-    },
-    setDateEnd: function (date) {
-        this.dateEnd = moment(date);
-        this.solEnd = this.utcToMartianDate(this.dateEnd);
-    },
-    getSolStart: function () {
-        if (!this.solStart) {
-            this.solStart =
-                this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
-                this.getNumDays();
-            return this.solStart;
-        } else {
-            return this.solStart;
-        }
-    },
-    getSolEnd: function () {
-        if (!this.solEnd) {
-            this.solEnd = this.utcToMartianDate(this.dateEnd);
-        }
-        return this.solEnd;
-    },
-    getDateStart: function (format = null) {
-        if (!this.dateStart) {
-            const date = moment().subtract(6, "days");
-            this.dateStart = date;
-        }
+	isFarenheight: false,
+	isMph: false,
+	apiError: [],
+	activemeasure: null, //"temp", "pres", "wind"
+	dateStart: null,
+	dateEnd: null,
+	solStart: null,
+	solEnd: null,
+	setDateStart: function (date) {
+		this.dateStart = moment(date);
+		this.solStart =
+			this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
+			this.getNumDays();
+	},
+	setDateEnd: function (date) {
+		this.dateEnd = moment(date);
+		this.solEnd = this.utcToMartianDate(this.dateEnd);
+	},
+	getSolStart: function () {
+		if (!this.solStart) {
+			this.solStart =
+				this.utcToMartianDate(moment(this.getDateEnd("YYYY-MM-DD"))) -
+				this.getNumDays();
+			return this.solStart;
+		} else {
+			return this.solStart;
+		}
+	},
+	getSolEnd: function () {
+		if (!this.solEnd) {
+			this.solEnd = this.utcToMartianDate(this.dateEnd);
+		}
+		return this.solEnd;
+	},
+	getDateStart: function (format = null) {
+		if (!this.dateStart) {
+			const date = moment().subtract(6, "days");
+			this.dateStart = date;
+		}
 
-        if (format) {
-            return this.dateStart.format(format);
-        } else {
-            return this.dateStart;
-        }
-    },
-    getDateEnd: function (format) {
-        if (!this.dateEnd) {
-            const date = moment();
-            this.dateEnd = date;
-        }
+		if (format) {
+			return this.dateStart.format(format);
+		} else {
+			return this.dateStart;
+		}
+	},
+	getDateEnd: function (format) {
+		if (!this.dateEnd) {
+			const date = moment();
+			this.dateEnd = date;
+		}
 
-        return this.dateEnd.format(format);
-    },
-    getNumDays: function () {
-        diffDays = this.dateEnd.diff(this.dateStart, "days");
-        return diffDays + 1;
-    },
-    utcToMartianDate: function (utc) {
-        const beginTimeKeep = moment("2018-11-26");
-        const sol = Math.abs(beginTimeKeep.diff(utc, "days")) / 1.0274912517;
-        return Math.floor(sol);
-    },
-    chartCtx: null,
-    chartLegend: null,
+		return this.dateEnd.format(format);
+	},
+	getNumDays: function () {
+		diffDays = this.dateEnd.diff(this.dateStart, "days");
+		return diffDays + 1;
+	},
+	utcToMartianDate: function (utc) {
+		const beginTimeKeep = moment("2018-11-26");
+		const sol = Math.abs(beginTimeKeep.diff(utc, "days")) / 1.0274912517;
+		return Math.floor(sol);
+	},
+	chartCtx: null,
+	chartLegend: null,
 };
 
 class WindRoseData {
-    N = 0;
-    NNW = 0;
-    NW = 0;
-    WNW = 0;
-    W = 0;
-    WSW = 0;
-    SW = 0;
-    SSW = 0;
-    S = 0;
-    SSE = 0;
-    SE = 0;
-    ESE = 0;
-    E = 0;
-    ENE = 0;
-    NE = 0;
-    NNE = 0;
+	N = 0;
+	NNW = 0;
+	NW = 0;
+	WNW = 0;
+	W = 0;
+	WSW = 0;
+	SW = 0;
+	SSW = 0;
+	S = 0;
+	SSE = 0;
+	SE = 0;
+	ESE = 0;
+	E = 0;
+	ENE = 0;
+	NE = 0;
+	NNE = 0;
 }
 
 function buildWindChartDataArr(planets) {
-    const windCrtdataArr = { labels: [], earth: [], mars: [] };
+	const windCrtdataArr = { labels: [], earth: [], mars: [] };
 
-    const windObjs = {
-        earth: new WindRoseData(),
-        mars: new WindRoseData(),
-    };
+	const windObjs = {
+		earth: new WindRoseData(),
+		mars: new WindRoseData(),
+	};
 
-    for (let i = 0; i < STATE.getNumDays(); i++) {
-        for (let [planetName, planetData] of Object.entries(planets)) {
-            if (
-                windObjs[planetName][planetData[i].windDir] < planetData[i].avg
-            ) {
-                windObjs[planetName][planetData[i].windDir] = planetData[i].avg;
-            }
-        }
-    }
+	for (let i = 0; i < STATE.getNumDays(); i++) {
+		for (let [planetName, planetData] of Object.entries(planets)) {
+			if (windObjs[planetName][planetData[i].windDir] < planetData[i].avg) {
+				windObjs[planetName][planetData[i].windDir] = planetData[i].avg;
+			}
+		}
+	}
 
-    windCrtdataArr.mars = Object.values(windObjs.mars);
-    windCrtdataArr.earth = Object.values(windObjs.earth);
-    windCrtdataArr.labels = Object.keys(windObjs.earth);
+	windCrtdataArr.mars = Object.values(windObjs.mars);
+	windCrtdataArr.earth = Object.values(windObjs.earth);
+	windCrtdataArr.labels = Object.keys(windObjs.earth);
 
-    return windCrtdataArr;
+	return windCrtdataArr;
 }
 
 function buildLineChartDataArr(planets, metric, measure) {
-    const lnCrtdataArr = {
-        labels: [],
-        earth: [],
-        mars: [],
-    };
+	const lnCrtdataArr = {
+		labels: [],
+		earth: [],
+		mars: [],
+	};
 
-    function getSol(i) {
-        if (!planets.mars[i].sol) {
-            return "na";
-        }
+	function getSol(i) {
+		if (!planets.mars[i].sol) {
+			return "na";
+		}
 
-        return planets.mars[i].sol;
-    }
+		return planets.mars[i].sol;
+	}
 
-    for (
-        let i = 0, date = moment(STATE.getDateStart());
-        i < STATE.getNumDays();
-        i++
-    ) {
-        lnCrtdataArr.labels.push(
-            date.format("M-D").toString().concat(" vs. ", getSol(i))
-        );
+	for (
+		let i = 0, date = moment(STATE.getDateStart());
+		i < STATE.getNumDays();
+		i++
+	) {
+		lnCrtdataArr.labels.push(
+			date.format("M-D").toString().concat(" vs. ", getSol(i))
+		);
 
-        for (let [planetName, planetData] of Object.entries(planets)) {
-            lnCrtdataArr[planetName].push(planetData[i][metric]);
-        }
+		for (let [planetName, planetData] of Object.entries(planets)) {
+			lnCrtdataArr[planetName].push(planetData[i][metric]);
+		}
 
-        date.add(1, "days");
-    }
+		date.add(1, "days");
+	}
 
-    return lnCrtdataArr;
+	return lnCrtdataArr;
 }
 
 function getChartData(measure) {
-    const data = { labels: [], datasets: [] };
+	const data = { labels: [], datasets: [] };
 
-    // validate datatype from DOM
-    if (measure != "at" && measure != "pressure" && measure != "wind") {
-        return data;
-    }
+	// validate datatype from DOM
+	if (measure != "at" && measure != "pressure" && measure != "wind") {
+		return data;
+	}
 
-    const dataSrc = {
-        mars: STORE.getDataByMeasure(measure, "martianWeather"),
-        earth: STORE.getDataByMeasure(measure, "earthWeather"),
-    };
+	const dataSrc = {
+		mars: STORE.getDataByMeasure(measure, "martianWeather"),
+		earth: STORE.getDataByMeasure(measure, "earthWeather"),
+	};
 
-    //If # of days retrieved are not = to the num days query, do not render this data set.
-    Object.keys(dataSrc).forEach((planet) => {
-        const len = STATE.getNumDays();
-        if (dataSrc[planet].length < len) {
-            for (let i = 0; i < len; i++) {
-                dataSrc[planet].push({ Error: "Missing Days" });
-            }
-            /* TODO: add unreliable data error */
-        }
-    });
+	//If # of days retrieved are not = to the num days query, do not render this data set.
+	Object.keys(dataSrc).forEach((planet) => {
+		const len = STATE.getNumDays();
+		if (dataSrc[planet].length < len) {
+			for (let i = 0; i < len; i++) {
+				dataSrc[planet].push({ Error: "Missing Days" });
+			}
+			/* TODO: add unreliable data error */
+		}
+	});
 
-    const metrics = ["avg"];
+	const metrics = ["avg"];
 
-    let dataArr = null;
-    if (measure == "wind") {
-        dataArr = buildWindChartDataArr(dataSrc);
-    } else {
-        dataArr = buildLineChartDataArr(dataSrc, metrics, measure);
-    }
+	let dataArr = null;
+	if (measure == "wind") {
+		dataArr = buildWindChartDataArr(dataSrc);
+	} else {
+		dataArr = buildLineChartDataArr(dataSrc, metrics, measure);
+	}
 
-    data.labels = dataArr.labels;
+	data.labels = dataArr.labels;
 
-    data.datasets.push({
-        label: "mars",
-        data: dataArr.mars,
-        borderWidth: 1,
-        backgroundColor: "rgba(192, 77, 15, 0.3)",
-        borderColor: "#FF6700",
-        pointBackgroundColor: "#FF6700",
-    });
+	data.datasets.push({
+		label: "mars",
+		data: dataArr.mars,
+		borderWidth: 1,
+		backgroundColor: "rgba(192, 77, 15, 0.3)",
+		borderColor: "#FF6700",
+		pointBackgroundColor: "#FF6700",
+	});
 
-    data.datasets.push({
-        label: "earth",
-        data: dataArr.earth,
-        borderWidth: 1,
-        backgroundColor: "rgba(0, 77, 201, 0.3)",
-        borderColor: "#004DC9",
-        pointBackgroundColor: "#2C7BFA",
-    });
+	data.datasets.push({
+		label: "earth",
+		data: dataArr.earth,
+		borderWidth: 1,
+		backgroundColor: "rgba(0, 77, 201, 0.3)",
+		borderColor: "#004DC9",
+		pointBackgroundColor: "#2C7BFA",
+	});
 
-    return data;
+	return data;
 }
 
 function pushMartianData(data) {
-    const dataErrors = [];
-    for (i = 0, keys = Object.keys(data); i < keys.length - 2; i++) {
-        let errOnDate = false;
-        try {
-            STORE.martianWeather.at.push({
-                sol: keys[i],
-                utc: data[keys[i]].Last_UTC,
-                avg: data[keys[i]].AT.av,
-                high: data[keys[i]].AT.mx,
-                low: data[keys[i]].AT.mn,
-            });
-        } catch (error) {
-            if (!errOnDate) {
-                dataErrors.push(keys[i]);
-                errOnDate = true;
-            }
+	const dataErrors = [];
+	for (i = 0, keys = Object.keys(data); i < keys.length - 2; i++) {
+		let errOnDate = false;
+		try {
+			STORE.martianWeather.at.push({
+				sol: keys[i],
+				utc: data[keys[i]].Last_UTC,
+				avg: data[keys[i]].AT.av,
+				high: data[keys[i]].AT.mx,
+				low: data[keys[i]].AT.mn,
+			});
+		} catch (error) {
+			if (!errOnDate) {
+				dataErrors.push(keys[i]);
+				errOnDate = true;
+			}
 
-            STORE.martianWeather.pressure.push({
-                sol: null,
-                utc: null,
-                avg: null,
-                high: null,
-                low: null,
-            });
-        }
+			STORE.martianWeather.pressure.push({
+				sol: null,
+				utc: null,
+				avg: null,
+				high: null,
+				low: null,
+			});
+		}
 
-        try {
-            STORE.martianWeather.pressure.push({
-                sol: keys[i],
-                utc: data[keys[i]].Last_UTC,
-                avg: data[keys[i]].PRE.av,
-                high: data[keys[i]].PRE.mx,
-                low: data[keys[i]].PRE.mn,
-            });
-        } catch (error) {
-            if (!errOnDate) {
-                dataErrors.push(keys[i]);
-                errOnDate = true;
-            }
+		try {
+			STORE.martianWeather.pressure.push({
+				sol: keys[i],
+				utc: data[keys[i]].Last_UTC,
+				avg: data[keys[i]].PRE.av,
+				high: data[keys[i]].PRE.mx,
+				low: data[keys[i]].PRE.mn,
+			});
+		} catch (error) {
+			if (!errOnDate) {
+				dataErrors.push(keys[i]);
+				errOnDate = true;
+			}
 
-            STORE.martianWeather.pressure.push({
-                sol: null,
-                utc: null,
-                avg: null,
-                high: null,
-                low: null,
-            });
-        }
-        try {
-            STORE.martianWeather.wind.push({
-                utc: data[keys[i]].Last_UTC,
-                avg: data[keys[i]].HWS.av,
-                high: data[keys[i]].HWS.mx,
-                low: data[keys[i]].HWS.mn,
-                windDir: data[keys[i]].WD.most_common.compass_point,
-            });
-        } catch (error) {
-            if (!errOnDate) {
-                dataErrors.push(keys[i]);
-                errOnDate = true;
-            }
+			STORE.martianWeather.pressure.push({
+				sol: null,
+				utc: null,
+				avg: null,
+				high: null,
+				low: null,
+			});
+		}
+		try {
+			STORE.martianWeather.wind.push({
+				utc: data[keys[i]].Last_UTC,
+				avg: data[keys[i]].HWS.av,
+				high: data[keys[i]].HWS.mx,
+				low: data[keys[i]].HWS.mn,
+				windDir: data[keys[i]].WD.most_common.compass_point,
+			});
+		} catch (error) {
+			if (!errOnDate) {
+				dataErrors.push(keys[i]);
+				errOnDate = true;
+			}
 
-            STORE.martianWeather.wind.push({
-                utc: null,
-                avg: null,
-                high: null,
-                low: null,
-                windDir: null,
-            });
-        }
-    }
+			STORE.martianWeather.wind.push({
+				utc: null,
+				avg: null,
+				high: null,
+				low: null,
+				windDir: null,
+			});
+		}
+	}
 
-    if (dataErrors.length > 0) {
-        const errors = dataErrors.join(", ");
-        STATE.apiError.push(`Missing data for sol(s): ${errors}`);
-    }
+	if (dataErrors.length > 0) {
+		const errors = dataErrors.join(", ");
+		STATE.apiError.push(`Missing data for sol(s): ${errors}`);
+	}
 }
 
 function pushTerranData(data) {
-    if (!data) {
-        STATE.apiError.push("No terran data found for location provided");
-        return;
-    }
-    const dataErrors = [];
-    for (i = 0; i < data.length; i++) {
-        let errOnDate = false;
-        try {
-            STORE.earthWeather.at.push({
-                utc: new Date(data[i].date),
-                avg: data[i].tavg,
-                high: data[i].tmax,
-                low: data[i].tmin,
-            });
-        } catch (error) {
-            if (!errOnDate) {
-                dataErrors.push(data[i].date);
-                errOnDate = true;
-            }
+	if (!data) {
+		STATE.apiError.push("No terran data found for location provided");
+		return;
+	}
+	const dataErrors = [];
+	for (i = 0; i < data.length; i++) {
+		let errOnDate = false;
+		try {
+			STORE.earthWeather.at.push({
+				utc: new Date(data[i].date),
+				avg: data[i].tavg,
+				high: data[i].tmax,
+				low: data[i].tmin,
+			});
+		} catch (error) {
+			if (!errOnDate) {
+				dataErrors.push(data[i].date);
+				errOnDate = true;
+			}
 
-            STORE.earthWeather.at.push({
-                utc: null,
-                avg: null,
-                high: null,
-                low: null,
-            });
-        }
+			STORE.earthWeather.at.push({
+				utc: null,
+				avg: null,
+				high: null,
+				low: null,
+			});
+		}
 
-        try {
-            STORE.earthWeather.pressure.push({
-                utc: new Date(data[i].date),
-                avg: data[i].pres,
-            });
-        } catch (error) {
-            if (!errOnDate) {
-                dataErrors.push(data[i].date);
-                errOnDate = true;
-            }
+		try {
+			STORE.earthWeather.pressure.push({
+				utc: new Date(data[i].date),
+				avg: data[i].pres,
+			});
+		} catch (error) {
+			if (!errOnDate) {
+				dataErrors.push(data[i].date);
+				errOnDate = true;
+			}
 
-            STORE.earthWeather.at.push({
-                utc: null,
-                avg: null,
-            });
-        }
+			STORE.earthWeather.at.push({
+				utc: null,
+				avg: null,
+			});
+		}
 
-        try {
-            STORE.earthWeather.wind.push({
-                utc: new Date(data[i].date),
-                avg: data[i].wspd,
-                windDir: degreesToBearing(data[i].wdir),
-            });
-        } catch (error) {
-            if (!errOnDate) {
-                dataErrors.push(data[i].date);
-                errOnDate = true;
-            }
+		try {
+			STORE.earthWeather.wind.push({
+				utc: new Date(data[i].date),
+				avg: data[i].wspd,
+				windDir: degreesToBearing(data[i].wdir),
+			});
+		} catch (error) {
+			if (!errOnDate) {
+				dataErrors.push(data[i].date);
+				errOnDate = true;
+			}
 
-            STORE.earthWeather.at.push({
-                utc: null,
-                avg: null,
-                windDir: null,
-            });
-        }
-    }
+			STORE.earthWeather.at.push({
+				utc: null,
+				avg: null,
+				windDir: null,
+			});
+		}
+	}
 
-    if (dataErrors.length > 0) {
-        const errors = dataErrors.join(", ");
-        STATE.apiError.push(`Missing for terran day(s): ${errors}`);
-    }
+	if (dataErrors.length > 0) {
+		const errors = dataErrors.join(", ");
+		STATE.apiError.push(`Missing for terran day(s): ${errors}`);
+	}
 }
 
 //API Calls
 function formatQueryParams(params) {
-    const queryItems = Object.keys(params).map(
-        (key) => `${key}=${params[key]}`
-    );
-    return queryItems.join("&");
+	const queryItems = Object.keys(params).map((key) => `${key}=${params[key]}`);
+	return queryItems.join("&");
 }
 
 function geolocate(location) {
-    let params = {
-        address: encodeURI(location),
-        key: "AIzaSyBDJyedOS2VN3Fxz4eutyeM1_grLUQfp7s",
-    };
+	let params = {
+		address: encodeURI(location),
+		key: "AIzaSyBDJyedOS2VN3Fxz4eutyeM1_grLUQfp7s",
+	};
 
-    params = formatQueryParams(params);
+	params = formatQueryParams(params);
 
-    return fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
+	return fetch(`https://maps.googleapis.com/maps/api/geocode/json?${params}`)
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error(response.statusText);
+			}
 
-            return response.json();
-        })
-        .then((responseJson) => {
-            if (responseJson.status == "ZERO_RESULTS") {
-                throw new Error("No Result");
-            }
+			return response.json();
+		})
+		.then((responseJson) => {
+			if (responseJson.status == "ZERO_RESULTS") {
+				throw new Error("No Result");
+			}
 
-            STORE.earthWeather.location.lat =
-                responseJson.results[0].geometry.location.lat;
-            STORE.earthWeather.location.lon =
-                responseJson.results[0].geometry.location.lng;
-            STORE.earthWeather.location.address =
-                responseJson.results[0].formatted_address;
+			STORE.earthWeather.location.lat =
+				responseJson.results[0].geometry.location.lat;
+			STORE.earthWeather.location.lon =
+				responseJson.results[0].geometry.location.lng;
+			STORE.earthWeather.location.address =
+				responseJson.results[0].formatted_address;
 
-            return true;
-        })
-        .catch((err) => {
-            STORE.earthWeather.location.lat = null;
-            STORE.earthWeather.location.lon = null;
-            STORE.earthWeather.location.address = "";
-            return false;
-        });
+			return true;
+		})
+		.catch((err) => {
+			STORE.earthWeather.location.lat = null;
+			STORE.earthWeather.location.lon = null;
+			STORE.earthWeather.location.address = "";
+			return false;
+		});
 }
 
 function fetchMartianData() {
-    //prettier-ignore
-    let params = { 
+	// Becasue the Insight mission has been failing, fictional data is generated
+	// if insufficient date is returned from NASA API.
+
+	// calculate sol per insight mission
+	const solOne = 1543190400; // November, 26 2018
+	const today = new Date().getTime() / 1000;
+	let sol = ((today - solOne) / 88775.24409).toFixed();
+
+	// pick a start date
+	// create object of 7.
+
+	/*
+     *
+     * Code for calling the insight API which unfotunately is not 
+     * returning suficient data at this poiint in time.
+     * 
+     *
+     let params = { 
         api_key: "JRPWKpyWr5JcEdUsLMypoII5iBeMaSn1Oy94DnkF", 
         feedtype: "json", 
         ver: "1.0", 
@@ -652,96 +665,107 @@ function fetchMartianData() {
 
     params = formatQueryParams(params);
 
-    return fetch(`https://api.nasa.gov/insight_weather/?${params}`)
-        .then((response) => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error(
-                "Failed to retrieve Martian data from the NASA Insight program"
-            );
-        })
-        .catch((err) => {
-            STATE.apiError.push(err);
-            return false;
-        });
+    const endpoint = `https://api.nasa.gov/insight_weather/?${params}`
+    */
+
+	const endpoint = "./data.json";
+
+	return fetch(endpoint)
+		.then((response) => {
+			if (response.ok) {
+				return response.json();
+			}
+			throw new Error(
+				"Failed to retrieve Martian data from the NASA Insight program"
+			);
+		})
+		.then((responseJson) => {
+			const sols = {};
+			for (s in responseJson) {
+				sols[sol] = responseJson[s];
+				sol++;
+			}
+			return sols;
+		})
+		.catch((err) => {
+			STATE.apiError.push(err);
+			return false;
+		});
 }
 
 function fetchTerranData() {
-    const headers = new Headers();
-    headers.append("x-api-key", "BXfdILEuBoXF0cB2NIrZVc5ileNAC4lW");
+	const headers = new Headers();
+	headers.append("x-api-key", "BXfdILEuBoXF0cB2NIrZVc5ileNAC4lW");
 
-    const requestOptions = {
-        method: "GET",
-        headers: headers,
-        redirect: "follow",
-    };
+	const requestOptions = {
+		method: "GET",
+		headers: headers,
+		redirect: "follow",
+	};
 
-    let params = {
-        lat: STORE.earthWeather.location.lat,
-        lon: STORE.earthWeather.location.lon,
-        alt: 336,
-        start: STATE.getDateStart("YYYY-MM-DD"),
-        end: STATE.getDateEnd("YYYY-MM-DD"),
-    };
+	let params = {
+		lat: STORE.earthWeather.location.lat,
+		lon: STORE.earthWeather.location.lon,
+		alt: 336,
+		start: STATE.getDateStart("YYYY-MM-DD"),
+		end: STATE.getDateEnd("YYYY-MM-DD"),
+	};
 
-    params = formatQueryParams(params);
+	params = formatQueryParams(params);
 
-    return fetch(
-        `https://cors-anywhere.herokuapp.com/https://api.meteostat.net/v2/point/daily?${params}`,
-        requestOptions
-    )
-        .then((response) => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error(
-                "Failed to retrieve terran data from weather service."
-            );
-        })
-        .catch((err) => {
-            STATE.apiError.push(err);
-            return false;
-        });
+	return fetch(
+		`https://cors-anywhere.herokuapp.com/https://api.meteostat.net/v2/point/daily?${params}`,
+		requestOptions
+	)
+		.then((response) => {
+			if (response.ok) {
+				return response.json();
+			}
+			throw new Error("Failed to retrieve terran data from weather service.");
+		})
+		.catch((err) => {
+			STATE.apiError.push(err);
+			return false;
+		});
 }
 
 function refreshDataArr() {
-    for (let [planetName, planetData] of Object.entries(STORE)) {
-        Object.keys(planetData).forEach((measure) => {
-            STORE[planetName][measure].length = 0;
-        });
-    }
+	for (let [planetName, planetData] of Object.entries(STORE)) {
+		Object.keys(planetData).forEach((measure) => {
+			STORE[planetName][measure].length = 0;
+		});
+	}
 }
 
 function updateData() {
-    refreshDataArr();
+	refreshDataArr();
 
-    const response = [fetchMartianData(), fetchTerranData()];
+	const response = [fetchMartianData(), fetchTerranData()];
 
-    return Promise.all(response).then(function (values) {
-        if (values[0]) {
-            pushMartianData(values[0]);
-        }
-        if (values[1]) {
-            pushTerranData(values[1].data);
-        }
-    });
+	return Promise.all(response).then(function (values) {
+		if (values[0]) {
+			pushMartianData(values[0]);
+		}
+		if (values[1]) {
+			pushTerranData(values[1].data);
+		}
+	});
 }
 
 // Render
 function renderChart(measure) {
-    const data = getChartData(measure);
-    const ctx = STATE.chartCtx;
+	const data = getChartData(measure);
+	const ctx = STATE.chartCtx;
 
-    const options = {
-        maintainAspectRatio: false,
-        legend: {
-            display: measure == "wind" ? false : true,
-            position: "bottom",
-        },
+	const options = {
+		maintainAspectRatio: false,
+		legend: {
+			display: measure == "wind" ? false : true,
+			position: "bottom",
+		},
 
-        legendCallback: function (chart) {
-            return `<table>
+		legendCallback: function (chart) {
+			return `<table>
                         <thead>
                             <tr>
                                 <td></td>
@@ -755,84 +779,84 @@ function renderChart(measure) {
                             <tr class="mars">
                                 <th class="js-legend-item">mars</th>
                                 <td>${STORE.getMin(
-                                    "martianWeather",
-                                    measure
-                                )}</td>
+																	"martianWeather",
+																	measure
+																)}</td>
                                 <td>${STORE.getAverage(
-                                    "martianWeather",
-                                    measure
-                                )}</td>
+																	"martianWeather",
+																	measure
+																)}</td>
                                 <td>${STORE.getMax(
-                                    "martianWeather",
-                                    measure
-                                )}</td>
+																	"martianWeather",
+																	measure
+																)}</td>
                             </tr>
                             <tr class = "earth">
                                 <th class="js-legend-item">earth</th>
                                 <td>${STORE.getMin(
-                                    "earthWeather",
-                                    measure
-                                )}</td>
+																	"earthWeather",
+																	measure
+																)}</td>
                                 <td>${STORE.getAverage(
-                                    "earthWeather",
-                                    measure
-                                )}</td>
+																	"earthWeather",
+																	measure
+																)}</td>
                                 <td>${STORE.getMax(
-                                    "earthWeather",
-                                    measure
-                                )}</td>
+																	"earthWeather",
+																	measure
+																)}</td>
                             </tr>
                         <tbody>
                     </table>`;
-        },
-    };
-    const chart = new Chart(ctx, {
-        data: data,
-        type: measure == "wind" ? "polarArea" : "line",
-        options: options,
-    });
+		},
+	};
+	const chart = new Chart(ctx, {
+		data: data,
+		type: measure == "wind" ? "polarArea" : "line",
+		options: options,
+	});
 
-    // Generate HTML legend
-    STATE.chartLegend.html(chart.generateLegend());
+	// Generate HTML legend
+	STATE.chartLegend.html(chart.generateLegend());
 }
 
 function renderData() {
-    const measure = STATE.activemeasure;
+	const measure = STATE.activemeasure;
 
-    function getUnitContainer() {
-        if (measure == "at") {
-            return `
+	function getUnitContainer() {
+		if (measure == "at") {
+			return `
             <div class="container unit">
                 <button class="left ${
-                    STATE.isFarenheight ? "" : "toggle-on"
-                }" data-measure="at">°C</button>
+									STATE.isFarenheight ? "" : "toggle-on"
+								}" data-measure="at">°C</button>
                 <button class="right ${
-                    STATE.isFarenheight ? "toggle-on" : ""
-                }" data-measure="at">°F</button>
+									STATE.isFarenheight ? "toggle-on" : ""
+								}" data-measure="at">°F</button>
             </div>`;
-        }
+		}
 
-        if (measure == "pressure") {
-            return `
+		if (measure == "pressure") {
+			return `
             <div class="container unit">
                 <button class="toggle-on" data-measure="at">hPh</button>
             </div>`;
-        }
+		}
 
-        if (measure == "wind") {
-            return `
+		if (measure == "wind") {
+			return `
             <div class="container unit">
                 <button class="left ${
-                    STATE.isMph ? "" : "toggle-on"
-                }" data-measure="wind">kPh</button>
+									STATE.isMph ? "" : "toggle-on"
+								}" data-measure="wind">kPh</button>
                 <button class="right ${
-                    STATE.isMph ? "toggle-on" : ""
-                }" data-measure="wind">mPh</button>
+									STATE.isMph ? "toggle-on" : ""
+								}" data-measure="wind">mPh</button>
             </div>`;
-        }
-    }
+		}
+	}
 
-    return `
+	return `
         <div class='container graph'>
             ${getUnitContainer()}
             <div class="chart-container fill">
@@ -844,28 +868,28 @@ function renderData() {
 }
 
 function renderWindRose(ctx, data) {
-    const options = {
-        scales: {
-            yAxes: [
-                {
-                    ticks: {
-                        beginAtZero: true,
-                    },
-                },
-            ],
-        },
-    };
+	const options = {
+		scales: {
+			yAxes: [
+				{
+					ticks: {
+						beginAtZero: true,
+					},
+				},
+			],
+		},
+	};
 
-    new Chart(ctx, {
-        data: data,
-        type: "polarArea",
-        options: options,
-    });
+	new Chart(ctx, {
+		data: data,
+		type: "polarArea",
+		options: options,
+	});
 }
 
 function renderGeoRes(submit = false) {
-    //prettier-ignore
-    const html = $("#js-geo-result-cont").html(`
+	//prettier-ignore
+	const html = $("#js-geo-result-cont").html(`
         ${
             submit
                 ? `<img id="js-geo-result-icon" class="geo-error" src="assets/error.png">`
@@ -876,15 +900,15 @@ function renderGeoRes(submit = false) {
         }">${submit ? "Address not found" : ""}</span>
     `);
 
-    if (STORE.earthWeather.location.isLocSet() && !submit) {
-        $(html)
-            .find("#js-geo-result")
-            .html("Comparing " + STORE.earthWeather.location.address);
-    }
+	if (STORE.earthWeather.location.isLocSet() && !submit) {
+		$(html)
+			.find("#js-geo-result")
+			.html("Comparing " + STORE.earthWeather.location.address);
+	}
 }
 
 function renderSplash() {
-    $("#js-content-wrapper").html(`
+	$("#js-content-wrapper").html(`
         <header class="bg-dark splash">
             <div class="container">
                 <h1>Martian Weather Service</h1>
@@ -915,22 +939,22 @@ function renderSplash() {
 }
 
 function renderError() {
-    const error = STATE.apiError;
-    const errorInDom = $("#js-content-wrapper").find(".api-error");
+	const error = STATE.apiError;
+	const errorInDom = $("#js-content-wrapper").find(".api-error");
 
-    if (errorInDom) {
-        $(errorInDom).remove();
-    }
+	if (errorInDom) {
+		$(errorInDom).remove();
+	}
 
-    if (STATE.apiError.length > 0) {
-        STATE.apiError = [];
-        let errorText = [];
-        for (const e of error) {
-            errorText.push(`<span>${e}</span>`);
-        }
+	if (STATE.apiError.length > 0) {
+		STATE.apiError = [];
+		let errorText = [];
+		for (const e of error) {
+			errorText.push(`<span>${e}</span>`);
+		}
 
-        errorTextHtml = errorText.join("");
-        $("#js-content-wrapper").append(`
+		errorTextHtml = errorText.join("");
+		$("#js-content-wrapper").append(`
         <div class="bg-error api-error">
             <div class="bg-dark api-error-container">
                 <img src="assets/attenae.svg" alt="antenna">
@@ -938,16 +962,16 @@ function renderError() {
                 <button id="js-clear-error">Ok</button>
             </div>
         </div>`);
-    } else {
-    }
+	} else {
+	}
 }
 
 function render() {
-    const measure = STATE.activemeasure;
+	const measure = STATE.activemeasure;
 
-    if (measure) {
-        //prettier-ignore
-        const html = $("#js-content-wrapper").html(
+	if (measure) {
+		//prettier-ignore
+		const html = $("#js-content-wrapper").html(
             `
             <header class="bg-dark">
                     <div class="container" style="">
@@ -1051,17 +1075,17 @@ function render() {
             </footer>`
         );
 
-        if (STATE.apiError.length > 0) {
-            renderError();
-        }
+		if (STATE.apiError.length > 0) {
+			renderError();
+		}
 
-        STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
-        STATE.chartLegend = $(html).find("#legend");
+		STATE.chartCtx = $(html).find("#myChart")[0].getContext("2d");
+		STATE.chartLegend = $(html).find("#legend");
 
-        renderChart(measure);
-    } else {
-        renderSplash();
-    }
+		renderChart(measure);
+	} else {
+		renderSplash();
+	}
 }
 
 $(render());
@@ -1069,101 +1093,99 @@ $(render());
 // Listeners
 
 (function () {
-    //watch compare
-    $("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (
-        e
-    ) {
-        e.preventDefault();
+	//watch compare
+	$("#js-content-wrapper").on("submit", "#js-comp-earth-to-mars", function (e) {
+		e.preventDefault();
 
-        if (!STORE.earthWeather.location.isLocSet()) {
-            renderGeoRes(true);
-        } else {
-            geolocate($("#js-location-selector").val()).then(() => {
-                updateData().then(() => {
-                    STATE.activemeasure = "at";
-                    render();
-                });
-            });
-        }
-    });
+		if (!STORE.earthWeather.location.isLocSet()) {
+			renderGeoRes(true);
+		} else {
+			geolocate($("#js-location-selector").val()).then(() => {
+				updateData().then(() => {
+					STATE.activemeasure = "at";
+					render();
+				});
+			});
+		}
+	});
 
-    // return;
+	// return;
 
-    //watch measure
-    $("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
-        e.preventDefault();
-        const measure = $(this).attr("data-measure");
-        STATE.activemeasure = measure;
-        render();
-    });
+	//watch measure
+	$("#js-content-wrapper").on("click", ".js-measure-selector", function (e) {
+		e.preventDefault();
+		const measure = $(this).attr("data-measure");
+		STATE.activemeasure = measure;
+		render();
+	});
 
-    // watch daterange
-    $("#js-content-wrapper").on("change", ".js-date-selector", function () {
-        STATE.setDateStart($("#js-start-date").val());
-        STATE.setDateEnd($("#js-end-date").val());
+	// watch daterange
+	$("#js-content-wrapper").on("change", ".js-date-selector", function () {
+		STATE.setDateStart($("#js-start-date").val());
+		STATE.setDateEnd($("#js-end-date").val());
 
-        updateData().then(() => {
-            render();
-        });
-    });
+		updateData().then(() => {
+			render();
+		});
+	});
 
-    //watch legend call back items
-    $("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
-        legendClickCallback(e);
-    });
+	//watch legend call back items
+	$("#js-content-wrapper").on("click", ".js-legend-item", function (e) {
+		legendClickCallback(e);
+	});
 
-    // watch unit-selector
-    $("#js-content-wrapper").on("click", ".unit button", function (e) {
-        e.preventDefault();
-        const measure = $(this).attr("data-measure");
-        if (measure == "at") {
-            STATE.isFarenheight = !STATE.isFarenheight;
-        } else if (measure == "wind") {
-            STATE.isMph = !STATE.isMph;
-        }
-        render();
-    });
+	// watch unit-selector
+	$("#js-content-wrapper").on("click", ".unit button", function (e) {
+		e.preventDefault();
+		const measure = $(this).attr("data-measure");
+		if (measure == "at") {
+			STATE.isFarenheight = !STATE.isFarenheight;
+		} else if (measure == "wind") {
+			STATE.isMph = !STATE.isMph;
+		}
+		render();
+	});
 
-    // watch location
-    $("#js-content-wrapper").on("input", "#js-location-selector", function (e) {
-        geolocate($(this).val()).then(() => {
-            renderGeoRes();
-        });
-    });
+	// watch location
+	$("#js-content-wrapper").on("input", "#js-location-selector", function (e) {
+		geolocate($(this).val()).then(() => {
+			renderGeoRes();
+		});
+	});
 
-    // watch ok error
-    $("#js-content-wrapper").on("click", "#js-clear-error", function (e) {
-        e.preventDefault();
-        renderError();
-    });
+	// watch ok error
+	$("#js-content-wrapper").on("click", "#js-clear-error", function (e) {
+		e.preventDefault();
+		renderError();
+	});
 
-    //watch go back
-    $("#js-content-wrapper").on("click", "#js-go-back", function (e) {
-        e.preventDefault();
-        renderSplash();
-    });
+	//watch go back
+	$("#js-content-wrapper").on("click", "#js-go-back", function (e) {
+		e.preventDefault();
+		renderSplash();
+	});
 })();
 
 function legendClickCallback(event) {
-    event = event || window.event;
+	event = event || window.event;
 
-    var target = event.target || event.srcElement;
-    while (target.nodeName !== "th") {
-        target = target.parentElement;
-    }
-    var parent = target.parentElement;
-    var chartId = parseInt(parent.classList[0].split("-")[0], 10);
-    var chart = Chart.instances[chartId];
-    var index = Array.prototype.slice.call(parent.children).indexOf(target);
+	var target = event.target || event.srcElement;
+	while (target.nodeName !== "th") {
+		target = target.parentElement;
+	}
+	var parent = target.parentElement;
+	var chartId = parseInt(parent.classList[0].split("-")[0], 10);
+	var chart = Chart.instances[chartId];
+	var index = Array.prototype.slice.call(parent.children).indexOf(target);
 
-    chart.legend.options.onClick.call(
-        chart,
-        event,
-        chart.legend.legendItems[index]
-    );
-    if (chart.isDatasetVisible(index)) {
-        target.classList.remove("hidden");
-    } else {
-        target.classList.add("hidden");
-    }
+	chart.legend.options.onClick.call(
+		chart,
+		event,
+		chart.legend.legendItems[index]
+	);
+	if (chart.isDatasetVisible(index)) {
+		target.classList.remove("hidden");
+	} else {
+		target.classList.add("hidden");
+	}
 }
